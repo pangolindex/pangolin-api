@@ -40,7 +40,6 @@ const coinGeckoClient = new CoinGecko();
 
 async function getGlobalStats() {
   result = await client.request(factoryQueryString)
-  console.log(result);
   return result;
 }
 
@@ -61,6 +60,14 @@ async function computeTVL() {
   return liquidity
 }
 
+async function computeVolume() {
+  const stats = await getGlobalStats();
+  const avaxPrice = await getAvaxPrice();
+
+  const volume = stats['pangolinFactories'][0]['totalVolumeETH'] * avaxPrice
+  return volume
+}
+
 /* GET total supply. */
 router.get('/', function(req, res, next) {
   res.send('Got a request');
@@ -68,13 +75,14 @@ router.get('/', function(req, res, next) {
 
 /* GET  TVL */
 router.get('/tvl', function(req, res, next) {
-  // getGlobalStats();
-  // const avaxPrice = getAvaxPrice().then(function (price) {
-  //   console.log("AVAX is", price)
-  // });
-  // res.send('900');
   computeTVL().then(function (tvl) {
     res.send(tvl.toFixed(2));
+  });
+});
+
+router.get('/total-volume', function(req, res, next) {
+  computeVolume().then(function (volume) {
+    res.send(volume.toFixed(2));
   });
 });
 
