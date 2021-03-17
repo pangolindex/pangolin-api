@@ -19,8 +19,8 @@ const pngAbi = [
 const pngContract = new ethers.Contract(PNG_ADDRESS, pngAbi, provider);
 
 // Supply constants
-const TOTAL_SUPPLY = ONE_TOKEN.mul(538000000);
 const ONE_TOKEN = BigNumber.from("1000000000000000000");
+const TOTAL_SUPPLY = ONE_TOKEN.mul(538000000);
 
 // Setup GraphQL Queries
 const client = new GraphQLClient('https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex', { headers: {} });
