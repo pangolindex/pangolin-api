@@ -13,6 +13,7 @@
     "express": "~4.16.1",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
+    "helmet": "^4.4.1",
     "http-errors": "~1.6.3",
     "jade": "^0.31.2",
     "morgan": "~1.9.1",

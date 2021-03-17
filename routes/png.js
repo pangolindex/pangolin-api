@@ -77,13 +77,15 @@ router.get('/', function(req, res, next) {
 router.get('/tvl', function(req, res, next) {
   computeTVL().then(function (tvl) {
     res.send(tvl.toFixed(2));
-  });
+  })
+  .catch(next);
 });
 
 router.get('/total-volume', function(req, res, next) {
   computeVolume().then(function (volume) {
     res.send(volume.toFixed(2));
-  });
+  })
+  .catch(next);
 });
 
 /* GET total supply. */

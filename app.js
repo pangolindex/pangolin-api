@@ -2,10 +2,12 @@ var express = require('express');
 var logger = require('morgan');
 var path = require('path')
 var rfs = require('rotating-file-stream')
+var helmet = require('helmet')
 
 var pngRouter = require('./routes/png');
 
 var app = express();
+app.use(helmet())
 
 // create a rotating write stream
 var accessLogStream = rfs.createStream('access.log', {
