@@ -4,10 +4,15 @@ var path = require('path')
 var rfs = require('rotating-file-stream')
 var helmet = require('helmet')
 
+var indexRouter = require('./routes/index');
 var pngRouter = require('./routes/png');
 
 var app = express();
 app.use(helmet())
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 // create a rotating write stream
 var accessLogStream = rfs.createStream('access.log', {
@@ -17,6 +22,7 @@ var accessLogStream = rfs.createStream('access.log', {
 
 app.use(logger('combined', { stream: accessLogStream }))
 
+app.use('/', indexRouter);
 app.use('/png', pngRouter)
 
 // catch 404 and forward to error handler
