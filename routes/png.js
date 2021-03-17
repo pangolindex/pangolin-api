@@ -3,8 +3,8 @@ const gql = require('graphql-request').gql;
 const GraphQLClient = require('graphql-request').GraphQLClient;
 const CoinGecko = require('coingecko-api');
 
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 // Pangolin contract addresses
 const TREASURY_VESTER_ADDRESS = "0x6747AC215dAFfeE03a42F49FebB6ab448E12acEe";
@@ -127,8 +127,8 @@ router.get('/total-supply-whole', function(req, res, next) {
  * @returns circulating supply of PNG in wei units
  */
 async function calcCirculating() {
-  var supply = TOTAL_SUPPLY;
-  var balance = await pngContract.balanceOf(TREASURY_VESTER_ADDRESS);
+  let supply = TOTAL_SUPPLY;
+  let balance = await pngContract.balanceOf(TREASURY_VESTER_ADDRESS);
   supply = supply.sub(balance);
 
   balance = await pngContract.balanceOf(COMMUNITY_TREASURY_ADDRESS);
