@@ -1,7 +1,9 @@
 {
-  "name": "png-api",
-  "version": "0.0.0",
+  "name": "pangolin-api",
+  "version": "0.1.0",
+  "description": "API for reading some key values of Pangolin and the PNG token.",
   "private": true,
+  "author": "@dasconnor",
   "scripts": {
     "start": "node ./bin/www"
   },
@@ -19,5 +21,9 @@
     "morgan": "~1.9.1",
     "react": "^17.0.1",
     "rotating-file-stream": "^2.1.5"
-  }
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "license": "BSD-3-Clause"
 }
