@@ -1,13 +1,13 @@
-var express = require('express');
-var logger = require('morgan');
-var path = require('path')
-var rfs = require('rotating-file-stream')
-var helmet = require('helmet')
+const express = require('express');
+const logger = require('morgan');
+const path = require('path')
+const rfs = require('rotating-file-stream')
+const helmet = require('helmet')
 
-var indexRouter = require('./routes/index');
-var pngRouter = require('./routes/png');
+const indexRouter = require('./routes/index');
+const pngRouter = require('./routes/png');
 
-var app = express();
+const app = express();
 app.use(helmet())
 
 // view engine setup
@@ -15,7 +15,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // create a rotating write stream
-var accessLogStream = rfs.createStream('access.log', {
+const accessLogStream = rfs.createStream('access.log', {
   interval: '1d', // rotate daily
   path: path.join(__dirname, 'log')
 })
