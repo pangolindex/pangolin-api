@@ -4,7 +4,7 @@ API for querying key values for Pangolin and the PNG token
 
 ## Location
 
-The API is available at `http://api.pangolin.exchange`
+The API is available at `https://api.pangolin.exchange`
 
 ## Methods
 
@@ -16,7 +16,7 @@ Get the total value locked in Pangolin in USD.
 
 Endpoint: `/png/tvl`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/tvl'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/tvl'`
 
 ### Pangolin Volume
 
@@ -24,7 +24,7 @@ Get the total lifetime volume of swaps on Pangolin in USD.
 
 Endpoint: `/png/total-volume`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/total-volume'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/total-volume'`
 
 ### PNG Total Supply
 
@@ -36,7 +36,7 @@ The PNG token has 18 decimals. Query the total supply denominated in units of "w
 
 Endpoint: `/png/total-supply`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/total-supply'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/total-supply'`
 
 #### Whole Token Denomination
 
@@ -44,7 +44,7 @@ The PNG token has 18 decimals. Query the total supply denominated in units of wh
 
 Endpoint: `/png/total-supply-whole`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/total-supply-whole'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/total-supply-whole'`
 
 ### PNG Circulating Supply
 
@@ -56,7 +56,7 @@ The PNG token has 18 decimals. Query the circulating supply denominated in units
 
 Endpoint: `/png/circulating-supply`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/circulating-supply'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/circulating-supply'`
 
 #### Whole Token Denomination
 
@@ -64,7 +64,7 @@ The PNG token has 18 decimals. Query the circulating supply denominated in units
 
 Endpoint: `/png/circulating-supply-whole`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/circulating-supply-whole'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/circulating-supply-whole'`
 
 ### Pangolin Community Treasury Supply
 
@@ -76,7 +76,7 @@ The PNG token has 18 decimals. Query the balance denominated in units of "wei." 
 
 Endpoint: `/png/community-treasury`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/community-treasury'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/community-treasury'`
 
 #### Whole Token Denomination
 
@@ -84,4 +84,4 @@ The PNG token has 18 decimals. Query the circulating supply denominated in units
 
 Endpoint: `/png/community-treasury-whole`
 
-Example call: `curl --location --request GET 'http://api.pangolin.exchange/png/community-treasury-whole'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/community-treasury-whole'`
