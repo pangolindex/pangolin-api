@@ -23,7 +23,7 @@ const userQuery = gql`query users($first: Int, $to_skip: Int) {
   users(first: $first, skip: $to_skip) {
     id
   }
-}`
+}`;
 
 const txQuery = gql`
 query transactions {
@@ -32,8 +32,16 @@ query transactions {
       amountUSD
     }
   }
-}
-`
+}`;
+
+let buildSwapQuery = function (skip = 0) {
+  return gql`query swaps {
+    swaps(
+     where: {}, skip: ${skip}) {
+      amountUSD
+    }
+  }`;
+};
 
 // Connect to CoinGeckoAPI
 const coinGeckoClient = new CoinGecko();
@@ -72,16 +80,30 @@ async function calcAddresses() {
   return num_addresses;
 }
 
-// WIP not correct, need to get number of swaps, not number of txs
+/**
+ * Helper to discover number of swap transactions
+ */
+async function getSwapsNumber(i = 0, j = 100000) {
+  let query = buildSwapQuery(j);
+  let { swaps } = await client.request(query);
+  let is_swaps = (swaps.length) ? swaps.length : 0;
+
+  if((is_swaps < 100 && is_swaps > 0) || j === 0) {
+    return j + is_swaps;
+  } else {
+    return is_swaps ? await getSwapsNumber(j, (j+((j-i) * 2))) : await getSwapsNumber(i, Math.floor((j - ((j-i) / 2))));
+  }
+}
+
+/**
+ * Calculate average swap transactions on USD
+ */
 async function calcAvg() {
-  let result = await client.request(factoryQuery)
+  let result = await client.request(factoryQuery);
   let totalVolumeETH = result['pangolinFactories'][0]['totalVolumeETH']
-  let txCount = result['pangolinFactories'][0]['txCount']
-
-  let avg = totalVolumeETH / txCount
-
-  let avaxPrice = await getAvaxPrice()
-
+  let avaxPrice = await getAvaxPrice();
+  let swapCount = await getSwapsNumber();
+  let avg = totalVolumeETH / swapCount;
   let avgUSD = avg * avaxPrice;
 
   return avgUSD;
