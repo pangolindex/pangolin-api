@@ -91,7 +91,7 @@ async function getSwapsNumber(i = 0, j = 100000) {
   if((is_swaps < 100 && is_swaps > 0) || j === 0) {
     return j + is_swaps;
   } else {
-    return is_swaps ? await getSwapsNumber(j, (j+((j-i) * 2))) : await getSwapsNumber(i, Math.floor((j - ((j-i) / 2))));
+    return is_swaps ? await getSwapsNumber(j, (j + ((j-i) * 2))) : await getSwapsNumber(i, Math.floor((j - ((j-i) / 2))));
   }
 }
 
