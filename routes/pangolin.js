@@ -1,0 +1,133 @@
+const { ethers, BigNumber } = require("ethers");
+const gql = require('graphql-request').gql;
+const GraphQLClient = require('graphql-request').GraphQLClient;
+const CoinGecko = require('coingecko-api');
+
+const express = require('express');
+const router = express.Router();
+
+// Setup GraphQL Queries
+const client = new GraphQLClient('https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex', { headers: {} });
+const factoryQuery = gql`query pangolinFactories {
+  pangolinFactories(
+   where: { id: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88" }) {
+    id
+    totalVolumeETH
+    totalLiquidityETH
+    txCount
+    pairCount
+  }
+}`;
+
+const userQuery = gql`query users($first: Int, $to_skip: Int) {
+  users(first: $first, skip: $to_skip) {
+    id
+  }
+}`
+
+const txQuery = gql`
+query transactions {
+  transactions(first: 100, orderBy: timestamp, orderDirection: desc) {
+    swaps(orderBy: timestamp, orderDirection: desc) {
+      amountUSD
+    }
+  }
+}
+`
+
+// Connect to CoinGeckoAPI
+const coinGeckoClient = new CoinGecko();
+
+/**
+ * Queries current AVAX price from CoinGecko
+ * @returns current AVAX price in USD
+ */
+ async function getAvaxPrice() {
+  const result = await coinGeckoClient.simple.price({
+    ids: ['avalanche-2'],
+    vs_currencies: ['usd']
+  })
+
+  return result['data']['avalanche-2']['usd']
+}
+
+/**
+ * Cacluculate the total number of addresses that have used Pangolin
+ */
+async function calcAddresses() {
+  let num_addresses = 0
+  let num_skip = 0;
+  let new_addrs = 0;
+  do {
+    let query_vars = {
+      first: 1000,
+      to_skip: num_skip
+    }
+    let result = await client.request(userQuery, query_vars)
+    new_addrs = result['users'].length
+    num_addresses = num_addresses + new_addrs
+    num_skip = num_skip + 1000
+   } while (new_addrs == 1000)
+
+  return num_addresses;
+}
+
+// WIP not correct, need to get number of swaps, not number of txs
+async function calcAvg() {
+  let result = await client.request(factoryQuery)
+  let totalVolumeETH = result['pangolinFactories'][0]['totalVolumeETH']
+  let txCount = result['pangolinFactories'][0]['txCount']
+
+  let avg = totalVolumeETH / txCount
+
+  let avaxPrice = await getAvaxPrice()
+
+  let avgUSD = avg * avaxPrice;
+
+  return avgUSD;
+}
+
+// WIP not correct, also need swap count, not tx count
+async function calcMedian() {
+
+  let result = await client.request(factoryQuery)
+
+  let txCount = result['pangolinFactories'][0]['txCount']
+
+  let medianIndex = Math.round(txCount / 2)
+
+}
+
+
+
+/**
+ *  GET the number of addresses who have used Pangolin
+ */
+router.get('/addresses', function(req, res, next) {
+  calcAddresses().then(function (addresses) {
+    res.send(addresses.toString());
+  })
+  .catch(next);
+});
+
+/**
+ *  GET the average swap value in USD
+ */
+ router.get('/transaction-average', function(req, res, next) {
+  calcAvg().then(function (avg) {
+    res.send(avg.toFixed(2).toString());
+  })
+  .catch(next);
+});
+
+/**
+ *  GET the median swap value in USD
+ */
+ router.get('/transaction-median', function(req, res, next) {
+  calcMedian().then(function (avg) {
+    res.send(avg.toFixed(2).toString());
+  })
+  .catch(next);
+});
+
+module.exports = router;
