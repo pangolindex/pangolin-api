@@ -25,20 +25,11 @@ const userQuery = gql`query users($first: Int, $to_skip: Int) {
   }
 }`;
 
-const txQuery = gql`
-  query transactions {
-    transactions(first: 100, orderBy: timestamp, orderDirection: desc) {
-      swaps(orderBy: timestamp, orderDirection: desc) {
+const swapQuery = gql`
+  query swaps($first: Int, $skip: Int, $orderBy: String) {
+    swaps(where: {}, first: $first, skip: $skip, orderBy: $orderBy) {
         amountUSD
-      }
     }
-  }`;
-
-let swapQuery = gql`
-  query swaps($first: Int, $skip: Int) {
-    swaps(where: {}, first: $first, skip: $skip) {
-        amountUSD
-      }
   }`;
 
 // Connect to CoinGeckoAPI
@@ -106,15 +97,15 @@ async function calcAvg() {
   return avgUSD;
 }
 
-// WIP not correct, also need swap count, not tx count
+/**
+ * Calculate median on swap transactions USD
+ */
 async function calcMedian() {
+  let swapCount = await getSwapsNumber();
+  let medianIndex = Math.floor(swapCount / 2);
+  let median = await client.request(swapQuery, { first: 1, skip: medianIndex, orderBy: 'amountUSD' });
 
-  let result = await client.request(factoryQuery)
-
-  let txCount = result['pangolinFactories'][0]['txCount']
-
-  let medianIndex = Math.round(txCount / 2)
-
+  return parseFloat(median['swaps'][0]['amountUSD']);
 }
 
 
