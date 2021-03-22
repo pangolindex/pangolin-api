@@ -100,7 +100,7 @@ async function getSwapsNumber(i = 0, j = 100000) {
  */
 async function calcAvg() {
   let result = await client.request(factoryQuery);
-  let totalVolumeETH = result['pangolinFactories'][0]['totalVolumeETH']
+  let totalVolumeETH = result['pangolinFactories'][0]['totalVolumeETH'];
   let avaxPrice = await getAvaxPrice();
   let swapCount = await getSwapsNumber();
   let avg = totalVolumeETH / swapCount;
