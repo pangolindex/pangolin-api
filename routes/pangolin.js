@@ -26,22 +26,20 @@ const userQuery = gql`query users($first: Int, $to_skip: Int) {
 }`;
 
 const txQuery = gql`
-query transactions {
-  transactions(first: 100, orderBy: timestamp, orderDirection: desc) {
-    swaps(orderBy: timestamp, orderDirection: desc) {
-      amountUSD
-    }
-  }
-}`;
-
-let buildSwapQuery = function (skip = 0) {
-  return gql`query swaps {
-    swaps(
-     where: {}, skip: ${skip}) {
-      amountUSD
+  query transactions {
+    transactions(first: 100, orderBy: timestamp, orderDirection: desc) {
+      swaps(orderBy: timestamp, orderDirection: desc) {
+        amountUSD
+      }
     }
   }`;
-};
+
+let swapQuery = gql`
+  query swaps($first: Int, $skip: Int) {
+    swaps(where: {}, first: $first, skip: $skip) {
+        amountUSD
+      }
+  }`;
 
 // Connect to CoinGeckoAPI
 const coinGeckoClient = new CoinGecko();
@@ -84,8 +82,7 @@ async function calcAddresses() {
  * Helper to discover number of swap transactions
  */
 async function getSwapsNumber(i = 0, j = 100000) {
-  let query = buildSwapQuery(j);
-  let { swaps } = await client.request(query);
+  let { swaps } = await client.request(swapQuery, { skip: j });
   let is_swaps = (swaps.length) ? swaps.length : 0;
 
   if((is_swaps < 100 && is_swaps > 0) || j === 0) {
