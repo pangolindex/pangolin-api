@@ -102,10 +102,13 @@ async function calcAvg() {
  */
 async function calcMedian() {
   let swapCount = await getSwapsNumber();
+  let avaxPrice = await getAvaxPrice(); 
   let medianIndex = Math.floor(swapCount / 2);
-  let median = await client.request(swapQuery, { first: 1, skip: medianIndex, orderBy: 'amountUSD' });
+  let medianSwap = await client.request(swapQuery, { first: 1, skip: medianIndex, orderBy: 'amountUSD' });
+  let median = parseFloat(medianSwap['swaps'][0]['amountUSD']);
+  let medianUSD = median * avaxPrice;
 
-  return parseFloat(median['swaps'][0]['amountUSD']);
+  return medianUSD;
 }
 
 
