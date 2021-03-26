@@ -85,3 +85,27 @@ The PNG token has 18 decimals. Query the circulating supply denominated in units
 Endpoint: `/png/community-treasury-whole`
 
 Example call: `curl --location --request GET 'https://api.pangolin.exchange/png/community-treasury-whole'`
+
+### Pangolin Number of Address
+
+Get the total lifetime number of unique address to transact on Pangolin.
+
+Endpoint: `/pangolin/addresses`
+
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/addresses'`
+
+### Pangolin Average Swap Size
+
+Get the average size of each swap on Pangolin in USD.
+
+Endpoint: `/pangolin/transaction-average`
+
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/transaction-average'`
+
+### Pangolin Median Swap Size
+
+Get the median size of each swap on Pangolin in USD.
+
+Endpoint: `/pangolin/transaction-median`
+
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/transaction-median'`
