@@ -6,6 +6,7 @@ const helmet = require('helmet')
 
 const indexRouter = require('./routes/index');
 const pngRouter = require('./routes/png');
+const pangolinRouter = require('./routes/pangolin');
 
 const app = express();
 app.use(helmet())
@@ -23,7 +24,8 @@ const accessLogStream = rfs.createStream('access.log', {
 app.use(logger('combined', { stream: accessLogStream }))
 
 app.use('/', indexRouter);
-app.use('/png', pngRouter)
+app.use('/png', pngRouter);
+app.use('/pangolin', pangolinRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
