@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 
 // Setup GraphQL Queries
-const client = new GraphQLClient('https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex', { headers: {} });
+const client = new GraphQLClient('https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex', { headers: {} });
 const factoryQuery = gql`query pangolinFactories {
   pangolinFactories(
    where: { id: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88" }) {
@@ -102,7 +102,7 @@ async function calcAvg() {
  */
 async function calcMedian() {
   let swapCount = await getSwapsNumber();
-  let avaxPrice = await getAvaxPrice(); 
+  let avaxPrice = await getAvaxPrice();
   let medianIndex = Math.floor(swapCount / 2);
   let medianSwap = await client.request(swapQuery, { first: 1, skip: medianIndex, orderBy: 'amountUSD' });
   let median = parseFloat(medianSwap['swaps'][0]['amountUSD']);

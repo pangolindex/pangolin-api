@@ -23,7 +23,7 @@ const ONE_TOKEN = BigNumber.from("1000000000000000000");
 const TOTAL_SUPPLY = ONE_TOKEN.mul(538000000);
 
 // Setup GraphQL Queries
-const client = new GraphQLClient('https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex', { headers: {} });
+const client = new GraphQLClient('https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex', { headers: {} });
 const factoryQueryString = gql`query pangolinFactories {
   pangolinFactories(
    where: { id: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88" }) {
