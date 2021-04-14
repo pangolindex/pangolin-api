@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 
 // Setup GraphQL Queries
-const client = new GraphQLClient('https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex', { headers: {} });
+const client = new GraphQLClient('https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex', { headers: {} });
 const factoryQuery = gql`query pangolinFactories {
   pangolinFactories(
    where: { id: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88" }) {
