@@ -1,0 +1,7 @@
+name = "pangolin-api"
+type = "javascript"
+workers_dev = true
+
+[build]
+command = "yarn run build"
+upload.format = "service-worker"

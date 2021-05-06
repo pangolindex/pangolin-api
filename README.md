@@ -2,6 +2,12 @@
 
 API for querying key values for Pangolin and the PNG token
 
+## Development
+
+[Wrangler](https://developers.cloudflare.com/workers/cli-wrangler) is used for a local development server. This is effectively a proxy-service that (nearly) replicates the Cloudflare Worker runtime.
+
+Anyone can develop this repository locally. Fill in `account_id` in the `wrangler.toml` file. This value may (and should) be your own personal `account_id`.
+
 ## Location
 
 The API is available at `https://api.pangolin.exchange`
