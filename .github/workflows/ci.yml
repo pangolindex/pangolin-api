@@ -19,6 +19,7 @@ jobs:
           node-version: ${{ env.node_version }}
       - run: yarn install --frozen-lockfile
       - run: yarn run test
+        env:
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNTID }}
   Lint:
     runs-on: ubuntu-latest
