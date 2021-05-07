@@ -1,7 +1,10 @@
 import {BigNumber} from '@ethersproject/bignumber';
-import {PNG_ADDRESS, RPC_URL} from './constants';
+import {Interface} from '@ethersproject/abi';
+import {PNG_ADDRESS, RPC_URL, ERC20_ABI} from './constants';
 
 export async function balanceOf(address: string) {
+  const iface = new Interface(ERC20_ABI);
+
   const _ = await fetch(RPC_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -12,7 +15,7 @@ export async function balanceOf(address: string) {
       params: [
         {
           to: PNG_ADDRESS,
-          data: `0x70a08231000000000000000000000000${address.slice(2)}`,
+          data: iface.encodeFunctionData('balanceOf', [address]),
         },
         'latest',
       ],
