@@ -1,7 +1,7 @@
 import {GRAPH_URL} from './constants';
 
-export async function request(query: string, variables = {}) {
-  const _ = await fetch(GRAPH_URL, {
+export async function request(query: string, variables = {}, url = GRAPH_URL) {
+  const _ = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({

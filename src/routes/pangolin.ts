@@ -3,7 +3,13 @@ import {getAvaxPrice} from '../utils/price';
 import {getSwapsNumber} from '../utils/swaps';
 import * as gql from '../utils/gql';
 import type {Handler} from 'worktop';
-import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../utils/constants';
+import {
+  STAKING_ADDRESSES,
+  WAVAX_ADDRESS,
+  DEPRECATED_GRAPH_URL,
+  PNG_ADDRESS,
+  WAVAX_PNG_ADDRESS,
+} from '../utils/constants';
 import {
   getStakingTokenAddress,
   getBalance,
@@ -43,11 +49,15 @@ export const average: Handler = async function (_, response) {
 // GET /pangolin/transaction-median
 export const median: Handler = async function (_, response) {
   const [avaxPrice, swapCount] = await Promise.all([getAvaxPrice(), getSwapsNumber()]);
-  const result = await gql.request(QUERIES.SWAP, {
-    first: 1,
-    skip: Math.floor(swapCount / 2),
-    orderBy: 'amountUSD',
-  });
+  const result = await gql.request(
+    QUERIES.SWAP,
+    {
+      first: 1,
+      skip: Math.floor(swapCount / 2),
+      orderBy: 'amountUSD',
+    },
+    DEPRECATED_GRAPH_URL,
+  );
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const median = Number.parseFloat(result.swaps[0].amountUSD);
 

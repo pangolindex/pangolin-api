@@ -1,3 +1,5 @@
+export const DEPRECATED_GRAPH_URL =
+  'https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex';
 export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
 export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
 
