@@ -9,3 +9,5 @@ export const COMMUNITY_TREASURY_ADDRESS = '0x650f5865541f6D68BdDFE977dB933C293EA
 import {BigNumber} from '@ethersproject/bignumber';
 export const ONE_TOKEN = BigNumber.from('1000000000000000000');
 export const TOTAL_SUPPLY = ONE_TOKEN.mul(538000000);
+
+export const ERC20_ABI = ['function balanceOf(address) view returns (uint)'];
