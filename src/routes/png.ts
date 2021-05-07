@@ -2,7 +2,7 @@ import type {Handler} from 'worktop';
 import {getAvaxPrice} from '../utils/price';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
-import {balanceOf} from '../utils/balance';
+import {balanceOf} from '../utils/calls';
 import {
   TOTAL_SUPPLY,
   ONE_TOKEN,
