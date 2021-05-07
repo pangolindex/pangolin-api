@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "API for reading some key values of Pangolin and the PNG token.",
   "private": true,
+  "author": "Connor Daly",
   "main": "build/index.js",
   "scripts": {
     "dev": "wrangler dev",
