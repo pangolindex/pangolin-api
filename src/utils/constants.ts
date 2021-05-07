@@ -1,4 +1,4 @@
-export const GRAPH_URL = 'https://graph-node.avax.network/subgraphs/name/dasconnor/pangolindex';
+export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
 export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
 
 export const PNG_ADDRESS = '0x60781C2586D68229fde47564546784ab3fACA982';
