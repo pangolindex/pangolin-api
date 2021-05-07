@@ -27,6 +27,15 @@ const STAKING_ADDRESSES = [
   '0x08b9a023e34bad6db868b699fa642bf5f12ebe76', // PNG-SNOB
 ];
 
+describe('/', (it) => {
+  it('/', async (context) => {
+    const {statusCode, data} = await get(context.address);
+
+    assert.is(statusCode, 200);
+    assert.is(data, 'Refer to https://github.com/pangolindex/pangolin-api for documentation.');
+  });
+});
+
 describe('/png/', (it) => {
   it('/png/tvl', async (context) => {
     const {statusCode, data} = await get(context.address + '/png/tvl');

@@ -11,6 +11,10 @@ API.prepare = CORS.preflight({
   methods: ['GET'],
 });
 
+API.add('GET', '/', (_, response) => {
+  response.end('Refer to https://github.com/pangolindex/pangolin-api for documentation.');
+});
+
 API.add('GET', '/png/tvl', PNG.tvl);
 API.add('GET', '/png/total-volume', PNG.volume);
 API.add('GET', '/png/total-supply', PNG.supply);
