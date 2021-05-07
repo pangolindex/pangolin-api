@@ -2,7 +2,7 @@ import type {Handler} from 'worktop';
 import {getAvaxPrice} from '../utils/price';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
-import {balanceOf} from '../utils/calls';
+import {getPNGBalance} from '../utils/calls';
 import {
   TOTAL_SUPPLY,
   ONE_TOKEN,
@@ -37,8 +37,8 @@ export const supplyWhole: Handler = async function (_, response) {
 // GET /png/circulating-supply
 export const circulating: Handler = async function (_, response) {
   response.end(
-    TOTAL_SUPPLY.sub(await balanceOf(TREASURY_VESTER_ADDRESS))
-      .sub(await balanceOf(COMMUNITY_TREASURY_ADDRESS))
+    TOTAL_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
+      .sub(await getPNGBalance(COMMUNITY_TREASURY_ADDRESS))
       .toString(),
   );
 };
@@ -46,8 +46,8 @@ export const circulating: Handler = async function (_, response) {
 // GET /png/circulating-supply-whole
 export const circulatingWhole: Handler = async function (_, response) {
   response.end(
-    TOTAL_SUPPLY.sub(await balanceOf(TREASURY_VESTER_ADDRESS))
-      .sub(await balanceOf(COMMUNITY_TREASURY_ADDRESS))
+    TOTAL_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
+      .sub(await getPNGBalance(COMMUNITY_TREASURY_ADDRESS))
       .div(ONE_TOKEN)
       .toString(),
   );
@@ -55,10 +55,10 @@ export const circulatingWhole: Handler = async function (_, response) {
 
 // GET /png/community-treasury
 export const treasury: Handler = async function (_, response) {
-  response.end((await balanceOf(COMMUNITY_TREASURY_ADDRESS)).toString());
+  response.end((await getPNGBalance(COMMUNITY_TREASURY_ADDRESS)).toString());
 };
 
 // GET /png/community-treasury-whole
 export const treasuryWhole: Handler = async function (_, response) {
-  response.end((await balanceOf(COMMUNITY_TREASURY_ADDRESS)).div(ONE_TOKEN).toString());
+  response.end((await getPNGBalance(COMMUNITY_TREASURY_ADDRESS)).div(ONE_TOKEN).toString());
 };

@@ -23,5 +23,6 @@ API.add('GET', '/png/community-treasury-whole', PNG.treasuryWhole);
 API.add('GET', '/pangolin/addresses', Pangolin.addresses);
 API.add('GET', '/pangolin/transaction-average', Pangolin.average);
 API.add('GET', '/pangolin/transaction-median', Pangolin.median);
+API.add('GET', '/pangolin/apr/:address', Pangolin.apr);
 
 listen(API.run);
