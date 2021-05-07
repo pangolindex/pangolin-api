@@ -115,3 +115,12 @@ Get the median size of each swap on Pangolin in USD.
 Endpoint: `/pangolin/transaction-median`
 
 Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/transaction-median'`
+
+### Pangolin Average Percentage Reward Rate
+
+Get the PNG Reward Rate of the inputted StakingRewards contract address.
+Refer to (constants.ts)[./src/utils/constants.ts] to find the supported contract addresses.
+
+Endpoint: `/pangolin/apr/{address}`
+
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/apr/0x417c02150b9a31bcacb201d1d60967653384e1c6'`
