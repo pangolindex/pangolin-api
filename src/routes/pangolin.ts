@@ -79,12 +79,12 @@ export const apr: Handler = async function (request, response) {
 
   const stakingTokenAddress = await getStakingTokenAddress(stakingAddress);
 
-  const depositedBalance = await getBalance(stakingTokenAddress, stakingAddress);
-  const totalSupply = await getTotalSupply(stakingTokenAddress);
+  const poolTokenBalance = await getBalance(stakingTokenAddress, stakingAddress);
+  const poolTokenSupply = await getTotalSupply(stakingTokenAddress);
 
   const [token0, token1] = await getPoolTokens(stakingTokenAddress);
 
-  const [avaxBalance, pngBalance] = await Promise.all([
+  const [pooledAVAX, pooledPNG] = await Promise.all([
     await getBalance(WAVAX_ADDRESS, WAVAX_PNG_ADDRESS),
     await getBalance(PNG_ADDRESS, WAVAX_PNG_ADDRESS),
   ]);
@@ -92,19 +92,19 @@ export const apr: Handler = async function (request, response) {
   const stakedAVAX = [token0, token1].includes(WAVAX_ADDRESS)
     ? (await getBalance(WAVAX_ADDRESS, stakingTokenAddress))
         .mul(2)
-        .mul(depositedBalance)
-        .div(totalSupply)
+        .mul(poolTokenBalance)
+        .div(poolTokenSupply)
     : (await getBalance(PNG_ADDRESS, stakingTokenAddress))
         .mul(2)
-        .mul(avaxBalance)
-        .div(pngBalance)
-        .mul(depositedBalance)
-        .div(totalSupply);
+        .mul(pooledAVAX)
+        .div(pooledPNG)
+        .mul(poolTokenBalance)
+        .div(poolTokenSupply);
 
   const rewardRate = (await getRewardRate(stakingAddress))
     .mul(60 * 60 * 24 * 7 * 52)
-    .mul(avaxBalance)
-    .div(pngBalance)
+    .mul(pooledAVAX)
+    .div(pooledPNG)
     .mul(100)
     .div(stakedAVAX);
 
