@@ -25,7 +25,11 @@ export const addresses: Handler = async function (_, response) {
   let new_addrs = 0;
   do {
     // eslint-disable-next-line no-await-in-loop
-    const data = await gql.request(QUERIES.USER, {first: 1000, to_skip: number_skip});
+    const data = await gql.request(
+      QUERIES.USER,
+      {first: 1000, to_skip: number_skip},
+      DEPRECATED_GRAPH_URL,
+    );
     if (data === undefined) {
       break;
     }
