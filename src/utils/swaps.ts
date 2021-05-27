@@ -2,7 +2,7 @@ import * as gql from './gql';
 import * as QUERIES from './queries';
 import {DEPRECATED_GRAPH_URL} from './constants';
 
-export async function getSwapsNumber(i = 0, j = 100000): Promise<number> {
+export async function getSwapsNumber(i = 0, j = 100_000): Promise<number> {
   const {swaps} = await gql.request(QUERIES.SWAP, {skip: j}, DEPRECATED_GRAPH_URL);
   const is_swaps: number = swaps.length > 0 ? swaps.length : 0;
 

@@ -10,7 +10,6 @@ export function normalizeAddress(address: string) {
 export async function getStakingTokenAddress(address: string) {
   const {result} = await call(STAKING_REWARDS_ABI, address, 'stakingToken', []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   return normalizeAddress(result);
 }
 
@@ -36,7 +35,6 @@ export async function getPoolTokens(address: string) {
     call(PAIR_ABI, address, 'token1', []),
   ]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   return [normalizeAddress(token0.result), normalizeAddress(token1.result)];
 }
 

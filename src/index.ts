@@ -1,7 +1,7 @@
 import {Router, listen} from 'worktop';
+import * as CORS from 'worktop/cors';
 import * as Pangolin from './routes/pangolin';
 import * as PNG from './routes/png';
-import * as CORS from 'worktop/cors';
 
 const API = new Router();
 
