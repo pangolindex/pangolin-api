@@ -1,6 +1,7 @@
 name = "pangolin-api"
 type = "javascript"
 workers_dev = true
+account_id = ""
 
 [build]
 command = "yarn run build"
