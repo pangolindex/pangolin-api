@@ -1,8 +1,8 @@
+import type {Handler} from 'worktop';
 import * as QUERIES from '../utils/queries';
 import {getAvaxPrice} from '../utils/price';
 import {getSwapsNumber} from '../utils/swaps';
 import * as gql from '../utils/gql';
-import type {Handler} from 'worktop';
 import {
   STAKING_ADDRESSES,
   WAVAX_ADDRESS,
@@ -21,22 +21,18 @@ import {
 // GET /pangolin/addresses
 export const addresses: Handler = async function (_, response) {
   let number_addresses = 0;
-  let number_skip = 0;
   let new_addrs = 0;
-  do {
-    // eslint-disable-next-line no-await-in-loop
-    const data = await gql.request(
-      QUERIES.USER,
-      {first: 1000, to_skip: number_skip},
-      DEPRECATED_GRAPH_URL,
-    );
-    if (data === undefined) {
-      break;
-    }
+  let firstUser = '0x0000000000000000000000000000000000000000';
 
-    new_addrs = data.users.length;
+  do {
+    const {users} = await gql.request(QUERIES.USER, {
+      first: 1000,
+      firstUser,
+      orderBy: 'id',
+    });
+    firstUser = users[users.length - 1].id;
+    new_addrs = users.length;
     number_addresses += new_addrs;
-    number_skip += 1000;
   } while (new_addrs === 1000);
 
   response.end(`${number_addresses}`);
@@ -62,7 +58,6 @@ export const median: Handler = async function (_, response) {
     },
     DEPRECATED_GRAPH_URL,
   );
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const median = Number.parseFloat(result.swaps[0].amountUSD);
 
   response.end((median * avaxPrice).toFixed(2));
