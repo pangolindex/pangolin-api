@@ -12,10 +12,10 @@ query pangolinFactories {
 }`;
 
 export const USER = `
-query users($first: Int, $to_skip: Int) {
-	users(first: $first, skip: $to_skip) {
-		id
-	}
+query users($first: Int, $firstUser: String, $orderBy: String) {
+  users(first: $first, where: { id_gt : $firstUser }, orderBy: $orderBy) {
+    id
+  }
 }`;
 
 export const SWAP = `
