@@ -84,7 +84,7 @@ describe('/pangolin', (it) => {
     assert.match(data, /^[.?\d]+/);
   });
 
-  // it('/pangolin/transaction-median', async () => {
+  // TODO: it('/pangolin/transaction-median', async () => {
   //   const {statusCode, data} = await get('/pangolin/transaction-median');
 
   //   assert.is(statusCode, 200);
