@@ -1,15 +1,8 @@
 import type {Handler} from 'worktop';
 import * as QUERIES from '../utils/queries';
 import {getAvaxPrice} from '../utils/price';
-import {getSwapsNumber} from '../utils/swaps';
 import * as gql from '../utils/gql';
-import {
-  STAKING_ADDRESSES,
-  WAVAX_ADDRESS,
-  DEPRECATED_GRAPH_URL,
-  PNG_ADDRESS,
-  WAVAX_PNG_ADDRESS,
-} from '../utils/constants';
+import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../utils/constants';
 import {
   getStakingTokenAddress,
   getBalance,
@@ -40,28 +33,14 @@ export const addresses: Handler = async function (_, response) {
 
 // GET /pangolin/transaction-average
 export const average: Handler = async function (_, response) {
-  const [avaxPrice, swapCount] = await Promise.all([getAvaxPrice(), getSwapsNumber()]);
-  const totalVolumeETH = (await gql.request(QUERIES.FACTORY)).pangolinFactories[0].totalVolumeETH;
+  const [avaxPrice, result] = await Promise.all([getAvaxPrice(), gql.request(QUERIES.FACTORY)]);
+  const {totalVolumeETH, txCount} = result.pangolinFactories[0];
 
-  response.end(((avaxPrice * totalVolumeETH) / swapCount).toFixed(2));
+  response.end(((avaxPrice * totalVolumeETH) / txCount).toFixed(2));
 };
 
 // GET /pangolin/transaction-median
-export const median: Handler = async function (_, response) {
-  const [avaxPrice, swapCount] = await Promise.all([getAvaxPrice(), getSwapsNumber()]);
-  const result = await gql.request(
-    QUERIES.SWAP,
-    {
-      first: 1,
-      skip: Math.floor(swapCount / 2),
-      orderBy: 'amountUSD',
-    },
-    DEPRECATED_GRAPH_URL,
-  );
-  const median = Number.parseFloat(result.swaps[0].amountUSD);
-
-  response.end((median * avaxPrice).toFixed(2));
-};
+// export const median: Handler = async function (_, response) {};
 
 // GET /pangolin/apr/:address
 export const apr: Handler = async function (request, response) {
