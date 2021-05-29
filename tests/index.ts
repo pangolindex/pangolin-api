@@ -84,12 +84,12 @@ describe('/pangolin', (it) => {
     assert.match(data, /^[.?\d]+/);
   });
 
-  it('/pangolin/transaction-median', async () => {
-    const {statusCode, data} = await get('/pangolin/transaction-median');
+  // it('/pangolin/transaction-median', async () => {
+  //   const {statusCode, data} = await get('/pangolin/transaction-median');
 
-    assert.is(statusCode, 200);
-    assert.match(data, /^[.?\d]+/);
-  });
+  //   assert.is(statusCode, 200);
+  //   assert.match(data, /^[.?\d]+/);
+  // });
 
   void Promise.all(
     STAKING_ADDRESSES.map((stakingAddress) => {
