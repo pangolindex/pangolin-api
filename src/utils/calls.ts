@@ -8,15 +8,11 @@ export function normalizeAddress(address: string) {
 }
 
 export async function getStakingTokenAddress(address: string) {
-  const {result} = await call(STAKING_REWARDS_ABI, address, 'stakingToken', []);
-
-  return normalizeAddress(result);
+  return normalizeAddress(await call(STAKING_REWARDS_ABI, address, 'stakingToken'));
 }
 
 export async function getRewardRate(address: string) {
-  const {result} = await call(STAKING_REWARDS_ABI, address, 'rewardRate', []);
-
-  return BigNumber.from(result);
+  return BigNumber.from(await call(STAKING_REWARDS_ABI, address, 'rewardRate'));
 }
 
 export async function getPNGBalance(address: string) {
@@ -24,31 +20,27 @@ export async function getPNGBalance(address: string) {
 }
 
 export async function getTotalSupply(address: string) {
-  const {result} = await call(ERC20_ABI, address, 'totalSupply', []);
-
-  return BigNumber.from(result);
+  return BigNumber.from(await call(ERC20_ABI, address, 'totalSupply'));
 }
 
 export async function getPoolTokens(address: string) {
   const [token0, token1] = await Promise.all([
-    call(PAIR_ABI, address, 'token0', []),
-    call(PAIR_ABI, address, 'token1', []),
+    call(PAIR_ABI, address, 'token0'),
+    call(PAIR_ABI, address, 'token1'),
   ]);
 
-  return [normalizeAddress(token0.result), normalizeAddress(token1.result)];
+  return [normalizeAddress(token0), normalizeAddress(token1)];
 }
 
 export async function getBalance(erc20: string, address: string) {
-  const {result} = await call(ERC20_ABI, erc20, 'balanceOf', [address]);
-
-  return BigNumber.from(result);
+  return BigNumber.from(await call(ERC20_ABI, erc20, 'balanceOf', [address]));
 }
 
 export async function call(
   abi: any[],
   toAddress: string,
   functionName: string,
-  functionData: any[],
+  functionData: any[] = [],
 ) {
   const iface = new Interface(abi);
 
@@ -69,5 +61,7 @@ export async function call(
     }),
   });
 
-  return _.json();
+  const {result} = await _.json();
+
+  return result;
 }
