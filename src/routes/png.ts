@@ -8,7 +8,7 @@ import {
   ONE_TOKEN,
   TREASURY_VESTER_ADDRESS,
   COMMUNITY_TREASURY_ADDRESS,
-} from '../utils/constants';
+} from '../constants';
 
 // GET /png/tvl
 export const tvl: Handler = async function (_, response) {

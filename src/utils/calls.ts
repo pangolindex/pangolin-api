@@ -1,7 +1,7 @@
 import {BigNumber} from '@ethersproject/bignumber';
 import {Interface} from '@ethersproject/abi';
 import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
-import {RPC_URL, ERC20_ABI, STAKING_REWARDS_ABI, PNG_ADDRESS, PAIR_ABI} from './constants';
+import {RPC_URL, ERC20_ABI, STAKING_REWARDS_ABI, PNG_ADDRESS, PAIR_ABI} from '../constants';
 
 export function normalizeAddress(address: string) {
   return hexZeroPad(hexStripZeros(address), 20);

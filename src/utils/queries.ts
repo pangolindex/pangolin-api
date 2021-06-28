@@ -1,4 +1,4 @@
-import {FACTORY_ADDRESS} from './constants';
+import {FACTORY_ADDRESS} from '../constants';
 
 export const FACTORY = `
 query pangolinFactories {

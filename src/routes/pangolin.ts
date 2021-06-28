@@ -2,7 +2,7 @@ import type {Handler} from 'worktop';
 import * as QUERIES from '../utils/queries';
 import {getAvaxPrice} from '../utils/price';
 import * as gql from '../utils/gql';
-import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../utils/constants';
+import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../constants';
 import {
   getStakingTokenAddress,
   getBalance,
