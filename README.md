@@ -119,7 +119,7 @@ Example call: `curl --location --request GET 'https://api.pangolin.exchange/pang
 ### Pangolin Average Percentage Reward Rate
 
 Get the PNG Reward Rate of the inputted StakingRewards contract address.
-Refer to [constants.ts](./src/utils/constants.ts) to find the supported contract addresses.
+Refer to [constants.ts](./src/constants.ts) to find the supported contract addresses.
 
 Endpoint: `/pangolin/apr/{address}`
 
