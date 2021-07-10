@@ -9,6 +9,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-return': 'warn',
     '@typescript-eslint/no-unsafe-member-access': 'warn',
     'array-callback-return': 'warn',
-    'no-await-in-loop': 'warn'
+    'no-await-in-loop': 'warn',
+    'unicorn/no-abusive-eslint-disable': 'warn'
   },
 }

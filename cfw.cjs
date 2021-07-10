@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * @type {import('cfw').Config}
  */
