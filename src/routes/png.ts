@@ -14,6 +14,7 @@ import {
 export const tvl: Handler = async function (_, response) {
   const [result, avaxPrice] = await Promise.all([gql.request(QUERIES.FACTORY), getAvaxPrice()]);
 
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end((result.pangolinFactories[0].totalLiquidityETH * avaxPrice).toFixed(2));
 };
 
@@ -21,21 +22,25 @@ export const tvl: Handler = async function (_, response) {
 export const volume: Handler = async function (_, response) {
   const [result, avaxPrice] = await Promise.all([gql.request(QUERIES.FACTORY), getAvaxPrice()]);
 
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end((result.pangolinFactories[0].totalVolumeETH * avaxPrice).toFixed(2));
 };
 
 // GET /png/total-supply
 export const supply: Handler = async function (_, response) {
+  response.setHeader('Cache-Control', 'public,s-maxage=31536000,immutable');
   response.end(TOTAL_SUPPLY.toString());
 };
 
 // GET /png/total-supply-whole
 export const supplyWhole: Handler = async function (_, response) {
+  response.setHeader('Cache-Control', 'public,s-maxage=31536000,immutable');
   response.end(TOTAL_SUPPLY.div(ONE_TOKEN).toString());
 };
 
 // GET /png/circulating-supply
 export const circulating: Handler = async function (_, response) {
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end(
     TOTAL_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
       .sub(await getPNGBalance(COMMUNITY_TREASURY_ADDRESS))
@@ -45,6 +50,7 @@ export const circulating: Handler = async function (_, response) {
 
 // GET /png/circulating-supply-whole
 export const circulatingWhole: Handler = async function (_, response) {
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end(
     TOTAL_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
       .sub(await getPNGBalance(COMMUNITY_TREASURY_ADDRESS))
@@ -55,10 +61,12 @@ export const circulatingWhole: Handler = async function (_, response) {
 
 // GET /png/community-treasury
 export const treasury: Handler = async function (_, response) {
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end((await getPNGBalance(COMMUNITY_TREASURY_ADDRESS)).toString());
 };
 
 // GET /png/community-treasury-whole
 export const treasuryWhole: Handler = async function (_, response) {
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end((await getPNGBalance(COMMUNITY_TREASURY_ADDRESS)).div(ONE_TOKEN).toString());
 };

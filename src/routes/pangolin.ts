@@ -28,6 +28,7 @@ export const addresses: Handler = async function (_, response) {
     number_addresses += new_addrs;
   } while (new_addrs === 1000);
 
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end(`${number_addresses}`);
 };
 
@@ -36,6 +37,7 @@ export const average: Handler = async function (_, response) {
   const [avaxPrice, result] = await Promise.all([getAvaxPrice(), gql.request(QUERIES.FACTORY)]);
   const {totalVolumeETH, txCount} = result.pangolinFactories[0];
 
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.end(((avaxPrice * totalVolumeETH) / txCount).toFixed(2));
 };
 
@@ -96,5 +98,6 @@ export const apr: Handler = async function (request, response) {
     // Divide by amount staked to get APR
     .div(stakedAVAX);
 
+  response.setHeader('Cache-Control', 'public,s-maxage=30');
   response.send(200, rewardRate.toString());
 };
