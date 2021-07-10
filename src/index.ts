@@ -1,5 +1,6 @@
-import {Router, listen} from 'worktop';
+import {Router} from 'worktop';
 import * as CORS from 'worktop/cors';
+import * as Cache from 'worktop/cache';
 import * as Pangolin from './routes/pangolin';
 import * as PNG from './routes/png';
 
@@ -12,6 +13,7 @@ API.prepare = CORS.preflight({
 });
 
 API.add('GET', '/', (_, response) => {
+  response.setHeader('Cache-Control', 'public,s-maxage=31536000,immutable');
   response.end('Refer to https://github.com/pangolindex/pangolin-api for documentation.');
 });
 
@@ -29,4 +31,4 @@ API.add('GET', '/pangolin/transaction-average', Pangolin.average);
 // API.add('GET', '/pangolin/transaction-median', Pangolin.median);
 API.add('GET', '/pangolin/apr/:address', Pangolin.apr);
 
-listen(API.run);
+Cache.listen(API.run);
