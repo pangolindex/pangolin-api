@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
+          cache: yarn
           node-version: ${{ env.node_version }}
       - run: yarn install --frozen-lockfile
       - run: yarn run test
@@ -27,6 +28,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
+          cache: yarn
           node-version: ${{ env.node_version }}
       - run: yarn install --frozen-lockfile
       - run: yarn run lint
