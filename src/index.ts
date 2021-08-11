@@ -7,7 +7,7 @@ import * as PNG from './routes/png';
 const API = new Router();
 
 API.prepare = CORS.preflight({
-  origin: '*',
+  origin: true,
   headers: ['Cache-Control', 'Content-Type'],
   methods: ['GET'],
 });
