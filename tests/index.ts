@@ -109,7 +109,7 @@ describe('/pangolin', (it) => {
         const {statusCode, data, headers} = await get(`/pangolin/apr/${stakingAddress}`);
 
         assert.is(statusCode, 200);
-        assert.ok(Number.parseInt(data, 10) > 0);
+        assert.ok(Number.parseFloat(data) > 0);
         assert.is(headers['cache-control'], 'public,s-maxage=30');
       });
     }),
