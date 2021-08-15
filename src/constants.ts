@@ -13,7 +13,7 @@ export const FACTORY_ADDRESS = '0xefa94DE7a4656D787667C749f7E1223D71E9FD88';
 export const TREASURY_VESTER_ADDRESS = '0x6747AC215dAFfeE03a42F49FebB6ab448E12acEe';
 export const COMMUNITY_TREASURY_ADDRESS = '0x650f5865541f6D68BdDFE977dB933C293EA72358';
 
-// https://github.com/pangolindex/interface/blob/master/src/state/stake/hooks.ts 
+// https://github.com/pangolindex/interface/blob/master/src/state/stake/hooks.ts
 export const STAKING_ADDRESSES = [
   '0x574d3245e36Cf8C9dc86430EaDb0fDB2F385F829', // AVAX-PNG
 
