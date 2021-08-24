@@ -37,7 +37,7 @@ export const average: Handler = async function (_, response) {
   const {totalVolumeUSD, txCount} = result.pangolinFactories[0];
 
   response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end((parseFloat(totalVolumeUSD) / parseInt(txCount)).toFixed(2));
+  response.end((Number.parseFloat(totalVolumeUSD) / Number.parseInt(txCount, 10)).toFixed(2));
 };
 
 // GET /pangolin/transaction-median

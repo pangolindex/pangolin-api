@@ -14,7 +14,7 @@ export const tvl: Handler = async function (_, response) {
   const result = await gql.request(QUERIES.FACTORY);
 
   response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end(parseFloat(result.pangolinFactories[0].totalLiquidityUSD).toFixed(2));
+  response.end(Number.parseFloat(result.pangolinFactories[0].totalLiquidityUSD).toFixed(2));
 };
 
 // GET /png/total-volume
@@ -22,7 +22,7 @@ export const volume: Handler = async function (_, response) {
   const result = await gql.request(QUERIES.FACTORY);
 
   response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end(parseFloat(result.pangolinFactories[0].totalVolumeUSD).toFixed(2));
+  response.end(Number.parseFloat(result.pangolinFactories[0].totalVolumeUSD).toFixed(2));
 };
 
 // GET /png/total-supply
