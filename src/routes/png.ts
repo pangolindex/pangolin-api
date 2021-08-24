@@ -1,5 +1,4 @@
 import type {Handler} from 'worktop';
-import {getAvaxPrice} from '../utils/price';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {getPNGBalance} from '../utils/calls';
@@ -12,18 +11,18 @@ import {
 
 // GET /png/tvl
 export const tvl: Handler = async function (_, response) {
-  const [result, avaxPrice] = await Promise.all([gql.request(QUERIES.FACTORY), getAvaxPrice()]);
+  const result = await gql.request(QUERIES.FACTORY);
 
   response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end((result.pangolinFactories[0].totalLiquidityETH * avaxPrice).toFixed(2));
+  response.end(parseFloat(result.pangolinFactories[0].totalLiquidityUSD).toFixed(2));
 };
 
 // GET /png/total-volume
 export const volume: Handler = async function (_, response) {
-  const [result, avaxPrice] = await Promise.all([gql.request(QUERIES.FACTORY), getAvaxPrice()]);
+  const result = await gql.request(QUERIES.FACTORY);
 
   response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end((result.pangolinFactories[0].totalVolumeETH * avaxPrice).toFixed(2));
+  response.end(parseFloat(result.pangolinFactories[0].totalVolumeUSD).toFixed(2));
 };
 
 // GET /png/total-supply

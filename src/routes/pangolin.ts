@@ -1,6 +1,5 @@
 import type {Handler} from 'worktop';
 import * as QUERIES from '../utils/queries';
-import {getAvaxPrice} from '../utils/price';
 import * as gql from '../utils/gql';
 import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../constants';
 import {
@@ -34,11 +33,11 @@ export const addresses: Handler = async function (_, response) {
 
 // GET /pangolin/transaction-average
 export const average: Handler = async function (_, response) {
-  const [avaxPrice, result] = await Promise.all([getAvaxPrice(), gql.request(QUERIES.FACTORY)]);
-  const {totalVolumeETH, txCount} = result.pangolinFactories[0];
+  const result = await gql.request(QUERIES.FACTORY);
+  const {totalVolumeUSD, txCount} = result.pangolinFactories[0];
 
   response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end(((avaxPrice * totalVolumeETH) / txCount).toFixed(2));
+  response.end((parseFloat(totalVolumeUSD) / parseInt(txCount)).toFixed(2));
 };
 
 // GET /pangolin/transaction-median

@@ -5,7 +5,9 @@ query pangolinFactories {
 	pangolinFactories(where: { id: "${FACTORY_ADDRESS}" }) {
 		id
 		totalVolumeETH
+		totalVolumeUSD
 		totalLiquidityETH
+		totalLiquidityUSD
 		txCount
 		pairCount
 	}
