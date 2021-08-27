@@ -1,4 +1,5 @@
 import type {Handler} from 'worktop';
+import {BigNumber} from '@ethersproject/bignumber';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../constants';
@@ -55,19 +56,41 @@ export const apr: Handler = async function (request, response) {
 
     const stakingTokenAddress = await getStakingTokenAddress(stakingAddress);
 
-    // How much PGL is staked
-    const poolTokenBalance = await getBalance(stakingTokenAddress, stakingAddress);
+    // Number of days to average swap volume from
+    const days = 7;
 
-    // Total PGL supply
-    const poolTokenSupply = await getTotalSupply(stakingTokenAddress);
+    const [
+      {pairDayDatas},
+      poolTokenBalance,
+      poolTokenSupply,
+      [token0, token1],
+      pooledAVAX,
+      pooledPNG,
+      stakingRewardRate,
+    ] = await Promise.all([
+      // // Swap volume over 7 days
+      gql.request(QUERIES.DAILY_VOLUME, {
+        days,
+        pairAddress: stakingTokenAddress,
+      }),
 
-    // Get the two token addresses in the pool
-    const [token0, token1] = await getPoolTokens(stakingTokenAddress);
+      // How much PGL is staked
+      getBalance(stakingTokenAddress, stakingAddress),
 
-    // Get how much AVAX and PNG are in the AVAX-PNG pool
-    const [pooledAVAX, pooledPNG] = await Promise.all([
-      await getBalance(WAVAX_ADDRESS, WAVAX_PNG_ADDRESS),
-      await getBalance(PNG_ADDRESS, WAVAX_PNG_ADDRESS),
+      // Total PGL supply
+      getTotalSupply(stakingTokenAddress),
+
+      // Get the two token addresses in the pool
+      getPoolTokens(stakingTokenAddress),
+
+      // How much AVAX is in the AVAX-PNG pool
+      getBalance(WAVAX_ADDRESS, WAVAX_PNG_ADDRESS),
+
+      // How much PNG is in the AVAX-PNG pool
+      getBalance(PNG_ADDRESS, WAVAX_PNG_ADDRESS),
+
+      // Current staking reward rate
+      getRewardRate(stakingAddress),
     ]);
 
     const stakedAVAX = [token0, token1].includes(WAVAX_ADDRESS)
@@ -87,7 +110,7 @@ export const apr: Handler = async function (request, response) {
           .mul(poolTokenBalance)
           .div(poolTokenSupply);
 
-    const rewardRate = (await getRewardRate(stakingAddress))
+    const stakingAPR = stakingRewardRate
       // Reward rate is per second
       .mul(60 * 60 * 24 * 7 * 52)
       // Convert to AVAX
@@ -98,8 +121,20 @@ export const apr: Handler = async function (request, response) {
       // Divide by amount staked to get APR
       .div(stakedAVAX);
 
-    response.setHeader('Cache-Control', 'public,s-maxage=30');
-    response.send(200, rewardRate.toString());
+    let swapVolumeUSD = BigNumber.from('0');
+    let liquidityUSD = BigNumber.from('0');
+    for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
+      swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
+      liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
+    }
+
+    const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
+    const averageLiquidityUSD = liquidityUSD.div(days);
+    const swapFeeAPR = fees.mul(100).div(averageLiquidityUSD);
+    const combinedAPR = stakingAPR.add(swapFeeAPR);
+
+    response.setHeader('Cache-Control', 'public,s-maxage=60');
+    response.send(200, combinedAPR.toString());
   } catch {
     response.send(200, 0);
   }

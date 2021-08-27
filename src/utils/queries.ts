@@ -17,6 +17,19 @@ query users($first: Int, $firstUser: String, $orderBy: String) {
   }
 }`;
 
+export const DAILY_VOLUME = `
+query pairDayDatas($days: Int, $pairAddress: String) {
+  pairDayDatas(
+    first: $days
+    orderBy: date
+    orderDirection: desc
+    where: { pairAddress: $pairAddress }
+  ) {
+    dailyVolumeUSD
+    reserveUSD
+  }
+}`;
+
 export const SWAP = `
 query swaps($first: Int, $skip: Int, $orderBy: String) {
 	swaps(where: {}, first: $first, skip: $skip, orderBy: $orderBy) {
