@@ -110,7 +110,7 @@ describe('/pangolin', (it) => {
 
         assert.is(statusCode, 200);
         assert.ok(Number.parseFloat(data) > 0);
-        assert.is(headers['cache-control'], 'public,s-maxage=30');
+        assert.is(headers['cache-control'], 'public,s-maxage=60');
       });
     }),
   );
