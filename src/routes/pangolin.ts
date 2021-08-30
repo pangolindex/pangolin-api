@@ -136,7 +136,7 @@ export const apr: Handler = async function (request, response) {
     response.setHeader('Cache-Control', 'public,s-maxage=60');
     response.send(200, {
       swapFeeApr: swapFeeAPR.toNumber(),
-      stakingApr: combinedAPR.toNumber(),
+      stakingApr: stakingAPR.toNumber(),
       combinedApr: combinedAPR.toNumber(),
     });
   } catch {
