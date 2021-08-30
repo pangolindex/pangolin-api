@@ -134,7 +134,11 @@ export const apr: Handler = async function (request, response) {
     const combinedAPR = stakingAPR.add(swapFeeAPR);
 
     response.setHeader('Cache-Control', 'public,s-maxage=60');
-    response.send(200, combinedAPR.toString());
+    response.send(200, {
+      swapFeeApr: swapFeeAPR.toNumber(),
+      stakingApr: combinedAPR.toNumber(),
+      combinedApr: combinedAPR.toNumber(),
+    });
   } catch {
     response.send(200, 0);
   }
