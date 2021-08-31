@@ -140,6 +140,11 @@ export const apr: Handler = async function (request, response) {
       combinedApr: combinedAPR.toNumber(),
     });
   } catch {
-    response.send(200, 0);
+    response.setHeader('Cache-Control', 'public,s-maxage=60');
+    response.send(200, {
+      swapFeeApr: 0,
+      stakingApr: 0,
+      combinedApr: 0,
+    });
   }
 };
