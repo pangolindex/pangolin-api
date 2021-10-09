@@ -1,9 +1,8 @@
 import type {Handler} from 'worktop';
-import {BigNumber} from '@ethersproject/bignumber';
 import {send} from 'worktop/response';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
-import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../constants';
+import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS, ZERO} from '../constants';
 import {
   getStakingTokenAddress,
   getBalance,
@@ -123,19 +122,21 @@ export const apr: Handler = async function (_, context) {
         .mul(poolTokenBalance)
         .div(poolTokenSupply);
 
-  const stakingAPR = stakingRewardRate
-    // Reward rate is per second
-    .mul(60 * 60 * 24 * 7 * 52)
-    // Convert to AVAX
-    .mul(pooledAVAX)
-    .div(pooledPNG)
-    // Percentage
-    .mul(100)
-    // Divide by amount staked to get APR
-    .div(stakedAVAX);
+  const stakingAPR = stakedAVAX.isZero()
+    ? ZERO
+    : stakingRewardRate
+        // Reward rate is per second
+        .mul(60 * 60 * 24 * 7 * 52)
+        // Convert to AVAX
+        .mul(pooledAVAX)
+        .div(pooledPNG)
+        // Percentage
+        .mul(100)
+        // Divide by amount staked to get APR
+        .div(stakedAVAX);
 
-  let swapVolumeUSD = BigNumber.from('0');
-  let liquidityUSD = BigNumber.from('0');
+  let swapVolumeUSD = ZERO;
+  let liquidityUSD = ZERO;
   for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
     swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
     liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
@@ -143,9 +144,7 @@ export const apr: Handler = async function (_, context) {
 
   const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
   const averageLiquidityUSD = liquidityUSD.div(days);
-  const swapFeeAPR = averageLiquidityUSD.isZero()
-    ? BigNumber.from('0')
-    : fees.mul(100).div(averageLiquidityUSD);
+  const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
   const combinedAPR = stakingAPR.add(swapFeeAPR);
 
   aprs.swapFeeApr = swapFeeAPR.toNumber();
