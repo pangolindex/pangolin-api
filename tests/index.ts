@@ -113,7 +113,6 @@ describe('/pangolin', (it) => {
         assert.ok(data.stakingApr !== undefined);
         assert.ok(data.combinedApr !== undefined);
         assert.is(headers['content-type'], 'application/json;charset=utf-8');
-        assert.is(headers['cache-control'], 'public,s-maxage=60');
       });
     }),
   );

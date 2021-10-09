@@ -1,5 +1,6 @@
 import type {Handler} from 'worktop';
 import {BigNumber} from '@ethersproject/bignumber';
+import {send} from 'worktop/response';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS} from '../constants';
@@ -12,7 +13,7 @@ import {
 } from '../utils/calls';
 
 // GET /pangolin/addresses
-export const addresses: Handler = async function (_, response) {
+export const addresses: Handler = async function () {
   let number_addresses = 0;
   let new_addrs = 0;
   let firstUser = '0x0000000000000000000000000000000000000000';
@@ -28,30 +29,41 @@ export const addresses: Handler = async function (_, response) {
     number_addresses += new_addrs;
   } while (new_addrs === 1000);
 
-  response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end(`${number_addresses}`);
+  return send(200, number_addresses, {
+    'Cache-Control': 'public,s-maxage=30',
+  });
 };
 
 // GET /pangolin/transaction-average
-export const average: Handler = async function (_, response) {
+export const average: Handler = async function () {
   const result = await gql.request(QUERIES.FACTORY);
   const {totalVolumeUSD, txCount} = result.pangolinFactories[0];
 
-  response.setHeader('Cache-Control', 'public,s-maxage=30');
-  response.end((Number.parseFloat(totalVolumeUSD) / Number.parseInt(txCount, 10)).toFixed(2));
+  const text = (Number.parseFloat(totalVolumeUSD) / Number.parseInt(txCount, 10)).toFixed(2);
+
+  return send(200, text, {
+    'Cache-Control': 'public,s-maxage=30',
+  });
 };
 
 // GET /pangolin/transaction-median
-// export const median: Handler = async function (_, response) {};
+// export const median: Handler = async function () {};
 
 // GET /pangolin/apr/:address
-export const apr: Handler = async function (request, response) {
+export const apr: Handler = async function (_, context) {
+  const aprs = {
+    swapFeeApr: 0,
+    stakingApr: 0,
+    combinedApr: 0,
+  };
+
+  let cacheable = false;
+
   try {
-    const stakingAddress = request.params.address;
+    const stakingAddress = context.params.address;
 
     if (!STAKING_ADDRESSES.includes(stakingAddress)) {
-      response.end('0');
-      return;
+      throw new Error('Address is not a valid staking address.');
     }
 
     const stakingTokenAddress = await getStakingTokenAddress(stakingAddress);
@@ -133,18 +145,20 @@ export const apr: Handler = async function (request, response) {
     const swapFeeAPR = fees.mul(100).div(averageLiquidityUSD);
     const combinedAPR = stakingAPR.add(swapFeeAPR);
 
-    response.setHeader('Cache-Control', 'public,s-maxage=60');
-    response.send(200, {
-      swapFeeApr: swapFeeAPR.toNumber(),
-      stakingApr: stakingAPR.toNumber(),
-      combinedApr: combinedAPR.toNumber(),
-    });
-  } catch {
-    response.setHeader('Cache-Control', 'public,s-maxage=60');
-    response.send(200, {
-      swapFeeApr: 0,
-      stakingApr: 0,
-      combinedApr: 0,
-    });
-  }
+    aprs.swapFeeApr = swapFeeAPR.toNumber();
+    aprs.stakingApr = stakingAPR.toNumber();
+    aprs.combinedApr = combinedAPR.toNumber();
+
+    cacheable = true;
+  } catch {}
+
+  return send(
+    200,
+    aprs,
+    cacheable
+      ? {
+          'Cache-Control': 'public,s-maxage=60',
+        }
+      : {},
+  );
 };

@@ -18,19 +18,19 @@
   },
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@cloudflare/wrangler": "1.19.0",
-    "@ethersproject/abi": "5.4.0",
-    "@ethersproject/bignumber": "5.4.1",
+    "@cloudflare/wrangler": "1.19.3",
+    "@ethersproject/abi": "5.4.1",
+    "@ethersproject/bignumber": "5.4.2",
     "@ethersproject/bytes": "5.4.0",
-    "cfw": "0.2.0",
-    "concurrently": "6.2.1",
-    "esbuild": "0.12.22",
+    "cfw": "0.3.0",
+    "concurrently": "6.3.0",
+    "esbuild": "0.13.4",
     "esbuild-register": "3.0.0",
     "httpie": "2.0.0-next.13",
-    "typescript": "4.3.5",
+    "typescript": "4.4.3",
     "uvu": "0.6.0-next.1",
     "wait-on": "6.0.0",
-    "worktop": "0.7.1",
-    "xo": "0.44.0"
+    "worktop": "0.8.0-next.5",
+    "xo": "0.45.0"
   }
 }

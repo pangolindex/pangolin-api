@@ -10,6 +10,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-member-access': 'warn',
     'array-callback-return': 'warn',
     'no-await-in-loop': 'warn',
-    'unicorn/no-abusive-eslint-disable': 'warn'
+    'unicorn/no-abusive-eslint-disable': 'warn',
+    '@typescript-eslint/naming-convention': 'warn'
   },
 }
