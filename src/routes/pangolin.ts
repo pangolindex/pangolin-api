@@ -76,7 +76,7 @@ export const apr: Handler = async function (_, context) {
     pooledPNG,
     stakingRewardRate,
   ] = await Promise.all([
-    // // Swap volume over 7 days
+    // Swap volume over 7 days
     gql.request(QUERIES.DAILY_VOLUME, {
       days,
       pairAddress: stakingTokenAddress,
