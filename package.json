@@ -17,6 +17,9 @@
     "test": "concurrently --success first --kill-others \"wrangler dev\" \"wait-on -d 5000 -t 30000 tcp:8787 && uvu -r esbuild-register tests -i setup\""
   },
   "license": "BSD-3-Clause",
+  "dependencies": {
+    "worktop": "0.8.0-next.5"
+  },
   "devDependencies": {
     "@cloudflare/wrangler": "1.19.3",
     "@ethersproject/abi": "5.4.1",
@@ -30,7 +33,6 @@
     "typescript": "4.4.3",
     "uvu": "0.6.0-next.1",
     "wait-on": "6.0.0",
-    "worktop": "0.8.0-next.5",
     "xo": "0.45.0"
   }
 }
