@@ -3,6 +3,7 @@ import {BigNumber} from '@ethersproject/bignumber';
 export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
 export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
 
+export const ZERO = BigNumber.from('0');
 export const ONE_TOKEN = BigNumber.from('1000000000000000000');
 export const TOTAL_SUPPLY = ONE_TOKEN.mul(538_000_000);
 

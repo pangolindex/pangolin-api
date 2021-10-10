@@ -5,4 +5,6 @@ account_id = ""
 
 [build]
 command = "yarn run build"
-upload.format = "service-worker"
+
+[build.upload]
+format = "service-worker"
