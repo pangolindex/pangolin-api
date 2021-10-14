@@ -1,6 +1,6 @@
 import * as assert from 'uvu/assert';
 import {STAKING_ADDRESSES} from '../src/constants';
-import {describe, get} from './setup';
+import {describe, get} from './setup/env';
 
 describe('/', (it) => {
   it('/', async () => {
