@@ -8,4 +8,5 @@ module.exports = {
   entry: 'index.ts',
   routes: ['api.pangolin.exchange/*'],
   usage: "bundled",
+  module: false,
 };

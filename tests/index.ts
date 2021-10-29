@@ -1,6 +1,6 @@
 import * as assert from 'uvu/assert';
 import {STAKING_ADDRESSES} from '../src/constants';
-import {describe, get} from './setup';
+import {describe, get} from './setup/env';
 
 describe('/', (it) => {
   it('/', async () => {
@@ -113,7 +113,6 @@ describe('/pangolin', (it) => {
         assert.ok(data.stakingApr !== undefined);
         assert.ok(data.combinedApr !== undefined);
         assert.is(headers['content-type'], 'application/json;charset=utf-8');
-        assert.is(headers['cache-control'], 'public,s-maxage=60');
       });
     }),
   );

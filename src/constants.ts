@@ -3,6 +3,7 @@ import {BigNumber} from '@ethersproject/bignumber';
 export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
 export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
 
+export const ZERO = BigNumber.from('0');
 export const ONE_TOKEN = BigNumber.from('1000000000000000000');
 export const TOTAL_SUPPLY = ONE_TOKEN.mul(538_000_000);
 
@@ -91,6 +92,9 @@ export const STAKING_ADDRESSES = [
   '0x0875e51e54fbb7e63b1819acb069dc8d684563eb', // AVAX-TIME
   '0x6528DCc443B2e014185946d1Dc1efd6e9aBE4CD8', // AVAX-HCT
   '0x55152E05202AE58fDab26b20c6Fd762F5BCA797c', // AVAX-FRAXV2
+  '0x23855F21d158efAE410e3568FB623C35BC1952E0', // AVAX-ROCO
+  '0xD6887808CfCd5cBFf867379e41FaC912F167b084', // AVAX-IMX
+  '0xFE6338BEBef1989afA225494A63f235D8e8f46fd', // AVAX-AMPL
   '0xc2ecb35624Ad941474371E696AC8DAd0dda5e4d5', // AVAX-ORBS
 
   '0x7ac007afB5d61F48D1E3C8Cc130d4cf6b765000e', // PNG-ETH
