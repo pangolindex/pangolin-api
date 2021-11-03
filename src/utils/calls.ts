@@ -1,7 +1,15 @@
 import {BigNumber} from '@ethersproject/bignumber';
 import {Interface} from '@ethersproject/abi';
 import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
-import {RPC_URL, ERC20_ABI, STAKING_REWARDS_ABI, PNG_ADDRESS, PAIR_ABI} from '../constants';
+import {
+  RPC_URL,
+  ERC20_ABI,
+  STAKING_REWARDS_ABI,
+  MINICHEF_ABI,
+  PNG_ADDRESS,
+  PAIR_ABI,
+  MINICHEFV2_ADDRESS
+} from '../constants';
 
 export function normalizeAddress(address: string) {
   return hexZeroPad(hexStripZeros(address), 20);
@@ -11,8 +19,24 @@ export async function getStakingTokenAddress(address: string) {
   return normalizeAddress(await call(STAKING_REWARDS_ABI, address, 'stakingToken'));
 }
 
+export async function getStakingTokenAddressFromMiniChefV2(pid: string) {
+  return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpToken', [pid]));
+}
+
 export async function getRewardRate(address: string) {
   return BigNumber.from(await call(STAKING_REWARDS_ABI, address, 'rewardRate'));
+}
+
+export async function getRewardPerSecondFromMiniChefV2() {
+  return BigNumber.from(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'rewardPerSecond'));
+}
+
+export async function getPoolInfoFromMiniChefV2(pid: string) {
+  return await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'poolInfo', [pid]);
+}
+
+export async function getTotalAllocationPointsFromMiniChefV2() {
+  return BigNumber.from(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'totalAllocPoint'));
 }
 
 export async function getPNGBalance(address: string) {

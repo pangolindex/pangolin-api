@@ -9,6 +9,10 @@ import {
   getTotalSupply,
   getPoolTokens,
   getRewardRate,
+  getStakingTokenAddressFromMiniChefV2,
+  getRewardPerSecondFromMiniChefV2,
+  getTotalAllocationPointsFromMiniChefV2,
+  getPoolInfoFromMiniChefV2,
 } from '../utils/calls';
 
 // GET /pangolin/addresses
@@ -127,7 +131,7 @@ export const apr: Handler = async function (_, context) {
       ? ZERO
       : stakingRewardRate
           // Reward rate is per second
-          .mul(60 * 60 * 24 * 7 * 52)
+          .mul(60 * 60 * 24 * 365)
           // Convert to AVAX
           .mul(pooledAVAX)
           .div(pooledPNG)
@@ -135,6 +139,107 @@ export const apr: Handler = async function (_, context) {
           .mul(100)
           // Divide by amount staked to get APR
           .div(stakedAVAX);
+
+    let swapVolumeUSD = ZERO;
+    let liquidityUSD = ZERO;
+    for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
+      swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
+      liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
+    }
+
+    const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
+    const averageLiquidityUSD = liquidityUSD.div(days);
+    const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
+    const combinedAPR = stakingAPR.add(swapFeeAPR);
+
+    aprs.swapFeeApr = swapFeeAPR.toNumber();
+    aprs.stakingApr = stakingAPR.toNumber();
+    aprs.combinedApr = combinedAPR.toNumber();
+  } catch {}
+
+  return send(200, aprs, {
+    'Cache-Control': 'public,s-maxage=60',
+  });
+};
+
+// GET /pangolin/apr2/:pid
+export const apr2: Handler = async function (_, context) {
+  const aprs = {
+    swapFeeApr: 0,
+    stakingApr: 0,
+    combinedApr: 0,
+  };
+
+  const poolId = context.params.pid;
+
+  // Verify valid poolId
+
+  try {
+    const stakingTokenAddress = await getStakingTokenAddressFromMiniChefV2(poolId);
+
+    // Number of days to average swap volume from
+    const days = 7;
+
+    const [
+      { pairDayDatas },
+      [ token0, token1 ],
+      pooledAVAX,
+      pooledPNG,
+      rewardPerSecond,
+      { allocPoints },
+      totalAllocPoints
+    ] = await Promise.all([
+      // Swap volume over 7 days
+      gql.request(QUERIES.DAILY_VOLUME, {
+        days,
+        pairAddress: stakingTokenAddress,
+      }),
+
+      // Get the two token addresses in the pool
+      getPoolTokens(stakingTokenAddress),
+
+      // How much AVAX is in the AVAX-PNG pool
+      getBalance(WAVAX_ADDRESS, WAVAX_PNG_ADDRESS),
+
+      // How much PNG is in the AVAX-PNG pool
+      getBalance(PNG_ADDRESS, WAVAX_PNG_ADDRESS),
+
+      // Current staking reward rate
+      getRewardPerSecondFromMiniChefV2(),
+
+      // Pool information especially allocation points
+      getPoolInfoFromMiniChefV2(poolId),
+
+      // Total allocation points
+      getTotalAllocationPointsFromMiniChefV2(),
+    ]);
+
+    const stakedAVAX = [token0, token1].includes(WAVAX_ADDRESS)
+      ? (await getBalance(WAVAX_ADDRESS, stakingTokenAddress))
+        // Other side of pool has equal value
+        .mul(2)
+      : (await getBalance(PNG_ADDRESS, stakingTokenAddress))
+        // Other side of pool has equal value
+        .mul(2)
+        // Convert to AVAX
+        .mul(pooledAVAX)
+        .div(pooledPNG)
+
+    const stakingAPR = stakedAVAX.isZero()
+      ? ZERO
+      : rewardPerSecond
+        // Reward rate is per second
+        .mul(60 * 60 * 24 * 365)
+        // Calculate weight of pool
+        .mul(allocPoints)
+        .div(totalAllocPoints)
+        // Convert to AVAX
+        .mul(pooledAVAX)
+        .div(pooledPNG)
+        // Percentage
+        .mul(100)
+        // Divide by amount staked to get APR
+        .div(stakedAVAX);
 
     let swapVolumeUSD = ZERO;
     let liquidityUSD = ZERO;
