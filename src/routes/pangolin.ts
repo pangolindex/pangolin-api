@@ -2,7 +2,18 @@ import type {Handler} from 'worktop';
 import {send} from 'worktop/response';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
-import {STAKING_ADDRESSES, WAVAX_ADDRESS, PNG_ADDRESS, WAVAX_PNG_ADDRESS, ZERO} from '../constants';
+import {
+  STAKING_ADDRESSES,
+  WAVAX_ADDRESS,
+  PNG_ADDRESS,
+  WAVAX_PNG_ADDRESS,
+  DAIe_ADDRESS,
+  USDCe_ADDRESS,
+  USDTe_ADDRESS,
+  ZERO,
+  TEN,
+  EIGHTEEN
+} from '../constants';
 import {
   getStakingTokenAddress,
   getBalance,
@@ -14,6 +25,7 @@ import {
   getTotalAllocationPointsFromMiniChefV2,
   getPoolInfoFromMiniChefV2,
 } from '../utils/calls';
+import {BigNumber, BigNumberish} from "@ethersproject/bignumber";
 
 // GET /pangolin/addresses
 export const addresses: Handler = async function () {
@@ -175,18 +187,20 @@ export const apr2: Handler = async function (_, context) {
   // Verify valid poolId
 
   try {
+    console.log(poolId);
     const stakingTokenAddress = await getStakingTokenAddressFromMiniChefV2(poolId);
+    console.log(stakingTokenAddress); // Failing at the above function call
 
     // Number of days to average swap volume from
     const days = 7;
 
     const [
       { pairDayDatas },
-      [ token0, token1 ],
-      pooledAVAX,
-      pooledPNG,
+      { bundle: { ethPrice: avaxPrice } },
+      { token: { derivedETH: derivedPngPrice } },
+      [token0, token1],
       rewardPerSecond,
-      { allocPoints },
+      {allocPoints},
       totalAllocPoints
     ] = await Promise.all([
       // Swap volume over 7 days
@@ -195,14 +209,16 @@ export const apr2: Handler = async function (_, context) {
         pairAddress: stakingTokenAddress,
       }),
 
+      // AVAX price in terms of USD
+      gql.request(QUERIES.AVAX_PRICE),
+
+      // PNG price in terms of AVAX
+      gql.request(QUERIES.TOKEN_PRICE, {
+        address: PNG_ADDRESS.toLowerCase(),
+      }),
+
       // Get the two token addresses in the pool
       getPoolTokens(stakingTokenAddress),
-
-      // How much AVAX is in the AVAX-PNG pool
-      getBalance(WAVAX_ADDRESS, WAVAX_PNG_ADDRESS),
-
-      // How much PNG is in the AVAX-PNG pool
-      getBalance(PNG_ADDRESS, WAVAX_PNG_ADDRESS),
 
       // Current staking reward rate
       getRewardPerSecondFromMiniChefV2(),
@@ -214,51 +230,65 @@ export const apr2: Handler = async function (_, context) {
       getTotalAllocationPointsFromMiniChefV2(),
     ]);
 
-    const stakedAVAX = [token0, token1].includes(WAVAX_ADDRESS)
-      ? (await getBalance(WAVAX_ADDRESS, stakingTokenAddress))
-        // Other side of pool has equal value
-        .mul(2)
-      : (await getBalance(PNG_ADDRESS, stakingTokenAddress))
-        // Other side of pool has equal value
-        .mul(2)
-        // Convert to AVAX
-        .mul(pooledAVAX)
-        .div(pooledPNG)
+    console.log(avaxPrice);
+    console.log(derivedPngPrice);
 
-    const stakingAPR = stakedAVAX.isZero()
-      ? ZERO
-      : rewardPerSecond
-        // Reward rate is per second
-        .mul(60 * 60 * 24 * 365)
-        // Calculate weight of pool
-        .mul(allocPoints)
-        .div(totalAllocPoints)
-        // Convert to AVAX
-        .mul(pooledAVAX)
-        .div(pooledPNG)
-        // Percentage
-        .mul(100)
-        // Divide by amount staked to get APR
-        .div(stakedAVAX);
-
-    let swapVolumeUSD = ZERO;
-    let liquidityUSD = ZERO;
-    for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
-      swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
-      liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
-    }
-
-    const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
-    const averageLiquidityUSD = liquidityUSD.div(days);
-    const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
-    const combinedAPR = stakingAPR.add(swapFeeAPR);
-
-    aprs.swapFeeApr = swapFeeAPR.toNumber();
-    aprs.stakingApr = stakingAPR.toNumber();
-    aprs.combinedApr = combinedAPR.toNumber();
-  } catch {}
+    // const pngPrice = pngDerivedPrice.mul(avaxPrice)
+    //
+    // let stakedPNG = ZERO
+    //
+    // if ([token0, token1].includes(PNG_ADDRESS)) {
+    //   stakedPNG = (await getBalance(PNG_ADDRESS, stakingTokenAddress)).mul(2)
+    // } else if ([token0, token1].includes(DAIe_ADDRESS)) {
+    //   const pairValueInDAI = (await getBalance(DAIe_ADDRESS, stakingTokenAddress)).mul(2)
+    //   stakedPNG = pairValueInDAI.div(pngPrice)
+    // } else if ([token0, token1].includes(USDCe_ADDRESS)) {
+    //   const pairValueInUSDC = (await getBalance(USDCe_ADDRESS, stakingTokenAddress)).mul(2)
+    //   stakedPNG = expandTo18Decimals(pairValueInUSDC, 6).div(pngPrice) // USDCe has 6 decimals
+    // } else if ([token0, token1].includes(USDTe_ADDRESS)) {
+    //   const pairValueInUSDT = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2)
+    //   stakedPNG = expandTo18Decimals(pairValueInUSDT, 6).div(pngPrice) // USDTe has 6 decimals
+    // } else if ([token0, token1].includes(WAVAX_ADDRESS)) {
+    //   const pairValueInWAVAX = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2)
+    //   stakedPNG = pairValueInWAVAX.mul(avaxPrice).div(pngPrice)
+    // }
+    //
+    // const stakingAPR = stakedPNG.isZero()
+    //   ? ZERO
+    //   : rewardPerSecond
+    //     // Calculate reward rate per year
+    //     .mul(60 * 60 * 24 * 365)
+    //     // Calculate weight of pool
+    //     .mul(allocPoints)
+    //     .div(totalAllocPoints)
+    //     // Percentage
+    //     .mul(100)
+    //     // Divide by amount staked to get APR
+    //     .div(stakedPNG);
+    //
+    // let swapVolumeUSD = ZERO;
+    // let liquidityUSD = ZERO;
+    // for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
+    //   swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
+    //   liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
+    // }
+    //
+    // const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
+    // const averageLiquidityUSD = liquidityUSD.div(days);
+    // const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
+    // const combinedAPR = stakingAPR.add(swapFeeAPR);
+    //
+    // aprs.swapFeeApr = swapFeeAPR.toNumber();
+    // aprs.stakingApr = stakingAPR.toNumber();
+    // aprs.combinedApr = combinedAPR.toNumber();
+  } catch(e) {console.error(e)}
 
   return send(200, aprs, {
     'Cache-Control': 'public,s-maxage=60',
   });
 };
+
+function expandTo18Decimals(value: BigNumber, decimals: BigNumberish) {
+  const scalar = TEN.pow(EIGHTEEN.sub(decimals))
+  return value.mul(scalar)
+}

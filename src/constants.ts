@@ -1,20 +1,27 @@
 import {BigNumber} from '@ethersproject/bignumber';
 
 export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
-export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
+// export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
+export const RPC_URL = 'http://127.0.0.1:8545/ext/bc/C/rpc';
+
 
 export const ZERO = BigNumber.from('0');
+export const TEN = BigNumber.from('10');
+export const EIGHTEEN = BigNumber.from('18')
 export const ONE_TOKEN = BigNumber.from('1000000000000000000');
 export const TOTAL_SUPPLY = ONE_TOKEN.mul(538_000_000);
 
 export const PNG_ADDRESS = '0x60781C2586D68229fde47564546784ab3fACA982';
+export const DAIe_ADDRESS = '0xd586E7F844cEa2F87f50152665BCbc2C279D8d70';
+export const USDTe_ADDRESS = '0xc7198437980c041c805A1EDcbA50c1Ce5db95118';
+export const USDCe_ADDRESS = '0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664';
 export const WAVAX_ADDRESS = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7';
 export const WAVAX_PNG_ADDRESS = '0xd7538cABBf8605BdE1f4901B47B8D42c61DE0367';
 export const FACTORY_ADDRESS = '0xefa94DE7a4656D787667C749f7E1223D71E9FD88';
 export const TREASURY_VESTER_ADDRESS = '0x6747AC215dAFfeE03a42F49FebB6ab448E12acEe';
 export const COMMUNITY_TREASURY_ADDRESS = '0x650f5865541f6D68BdDFE977dB933C293EA72358';
 
-export const MINICHEFV2_ADDRESS = '';
+export const MINICHEFV2_ADDRESS = '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853';
 
 // https://github.com/pangolindex/interface/blob/master/src/state/stake/hooks.ts
 export const STAKING_ADDRESSES = [
@@ -185,79 +192,79 @@ export const STAKING_REWARDS_ABI = [
 ];
 export const MINICHEF_ABI = [
   {
-    'inputs': [
+    inputs: [
       {
-        'internalType': 'uint256',
-        'name': '',
-        'type': 'uint256'
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
       }
     ],
-    'name': 'lpToken',
-    'outputs': [
+    name: 'lpToken',
+    outputs: [
       {
-        'internalType': 'contract IERC20',
-        'name': '',
-        'type': 'address'
+        internalType: 'contract IERC20',
+        name: '',
+        type: 'address'
       }
     ],
-    'stateMutability': 'view',
-    'type': 'function'
+    stateMutability: 'view',
+    type: 'function'
   },
-  {
-    'inputs': [
-      {
-        'internalType': 'uint256',
-        'name': '',
-        'type': 'uint256'
-      }
-    ],
-    'name': 'poolInfo',
-    'outputs': [
-      {
-        'internalType': 'uint128',
-        'name': 'accRewardPerShare',
-        'type': 'uint128'
-      },
-      {
-        'internalType': 'uint64',
-        'name': 'lastRewardTime',
-        'type': 'uint64'
-      },
-      {
-        'internalType': 'uint64',
-        'name': 'allocPoint',
-        'type': 'uint64'
-      }
-    ],
-    'stateMutability': 'view',
-    'type': 'function'
-  },
-  {
-    'inputs': [],
-    'name': 'rewardPerSecond',
-    'outputs': [
-      {
-        'internalType': 'uint256',
-        'name': '',
-        'type': 'uint256'
-      }
-    ],
-    'stateMutability': 'view',
-    'type': 'function'
-  },
-  {
-    'inputs': [],
-    'name': 'totalAllocPoint',
-    'outputs': [
-      {
-        'internalType': 'uint256',
-        'name': '',
-        'type': 'uint256'
-      }
-    ],
-    'stateMutability': 'view',
-    'type': 'function'
-  }
+  // {
+  //   'inputs': [
+  //     {
+  //       'internalType': 'uint256',
+  //       'name': '',
+  //       'type': 'uint256'
+  //     }
+  //   ],
+  //   'name': 'poolInfo',
+  //   'outputs': [
+  //     {
+  //       'internalType': 'uint128',
+  //       'name': 'accRewardPerShare',
+  //       'type': 'uint128'
+  //     },
+  //     {
+  //       'internalType': 'uint64',
+  //       'name': 'lastRewardTime',
+  //       'type': 'uint64'
+  //     },
+  //     {
+  //       'internalType': 'uint64',
+  //       'name': 'allocPoint',
+  //       'type': 'uint64'
+  //     }
+  //   ],
+  //   'stateMutability': 'view',
+  //   'type': 'function'
+  // },
+  // {
+  //   'inputs': [],
+  //   'name': 'rewardPerSecond',
+  //   'outputs': [
+  //     {
+  //       'internalType': 'uint256',
+  //       'name': '',
+  //       'type': 'uint256'
+  //     }
+  //   ],
+  //   'stateMutability': 'view',
+  //   'type': 'function'
+  // },
+  // {
+  //   'inputs': [],
+  //   'name': 'totalAllocPoint',
+  //   'outputs': [
+  //     {
+  //       'internalType': 'uint256',
+  //       'name': '',
+  //       'type': 'uint256'
+  //     }
+  //   ],
+  //   'stateMutability': 'view',
+  //   'type': 'function'
+  // }
 ];
 export const PAIR_ABI = [
   {

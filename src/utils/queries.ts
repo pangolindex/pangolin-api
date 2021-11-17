@@ -36,3 +36,17 @@ query swaps($first: Int, $skip: Int, $orderBy: String) {
 		amountUSD
 	}
 }`;
+
+export const AVAX_PRICE = `
+{
+  bundle(id: 1) {
+    ethPrice
+  }
+}`;
+
+export const TOKEN_PRICE = `
+query token($address: ID) {
+  token(id: $address) {
+    derivedETH
+  }
+}`;
