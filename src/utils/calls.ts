@@ -32,7 +32,9 @@ export async function getRewardPerSecondFromMiniChefV2() {
 }
 
 export async function getPoolInfoFromMiniChefV2(pid: string) {
-  return await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'poolInfo', [pid]);
+  const iface = new Interface(MINICHEF_ABI);
+  const response = await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'poolInfo', [pid]);
+  return iface.decodeFunctionResult('poolInfo', response);
 }
 
 export async function getTotalAllocationPointsFromMiniChefV2() {
