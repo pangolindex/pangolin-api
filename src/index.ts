@@ -34,6 +34,7 @@ API.add('GET', '/pangolin/addresses', Pangolin.addresses);
 API.add('GET', '/pangolin/transaction-average', Pangolin.average);
 // API.add('GET', '/pangolin/transaction-median', Pangolin.median);
 API.add('GET', '/pangolin/apr/:address', Pangolin.apr);
+API.add('GET', '/pangolin/apr2/:pid', Pangolin.apr2);
 
 Cache.listen(async (event) => {
   return API.run(event.request, event);
