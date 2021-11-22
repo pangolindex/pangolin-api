@@ -8,7 +8,7 @@ import {
   MINICHEF_ABI,
   PNG_ADDRESS,
   PAIR_ABI,
-  MINICHEFV2_ADDRESS
+  MINICHEFV2_ADDRESS,
 } from '../constants';
 
 export function normalizeAddress(address: string) {

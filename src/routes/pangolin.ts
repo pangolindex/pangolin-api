@@ -1,5 +1,6 @@
 import type {Handler} from 'worktop';
 import {send} from 'worktop/response';
+import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {
@@ -12,7 +13,7 @@ import {
   USDTe_ADDRESS,
   ZERO,
   TEN,
-  EIGHTEEN
+  EIGHTEEN,
 } from '../constants';
 import {
   getStakingTokenAddress,
@@ -25,7 +26,6 @@ import {
   getTotalAllocationPointsFromMiniChefV2,
   getPoolInfoFromMiniChefV2,
 } from '../utils/calls';
-import {BigNumber, BigNumberish} from "@ethersproject/bignumber";
 
 // GET /pangolin/addresses
 export const addresses: Handler = async function () {
@@ -193,13 +193,17 @@ export const apr2: Handler = async function (_, context) {
     const days = 7;
 
     const [
-      { pairDayDatas },
-      { bundle: { ethPrice: avaxPriceString } },
-      { token: { derivedETH: derivedPngString } },
-      [ token0, token1 ],
+      {pairDayDatas},
+      {
+        bundle: {ethPrice: avaxPriceString},
+      },
+      {
+        token: {derivedETH: derivedPngString},
+      },
+      [token0, token1],
       rewardPerSecond,
-      [ accRewardPerShare, lastRewardTime, allocPoint ],
-      totalAllocPoints
+      poolInfo,
+      totalAllocPoints,
     ] = await Promise.all([
       // Swap volume over 7 days
       gql.request(QUERIES.DAILY_VOLUME, {
@@ -252,15 +256,15 @@ export const apr2: Handler = async function (_, context) {
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
       : rewardPerSecond
-        // Calculate reward rate per year
-        .mul(60 * 60 * 24 * 365)
-        // Calculate weight of pool
-        .mul(allocPoint)
-        .div(totalAllocPoints)
-        // Percentage
-        .mul(100)
-        // Divide by amount staked to get APR
-        .div(stakedPNG);
+          // Calculate reward rate per year
+          .mul(60 * 60 * 24 * 365)
+          // Calculate weight of pool
+          .mul(poolInfo.allocPoint)
+          .div(totalAllocPoints)
+          // Percentage
+          .mul(100)
+          // Divide by amount staked to get APR
+          .div(stakedPNG);
 
     let swapVolumeUSD = ZERO;
     let liquidityUSD = ZERO;
@@ -277,7 +281,7 @@ export const apr2: Handler = async function (_, context) {
     aprs.swapFeeApr = swapFeeAPR.toNumber();
     aprs.stakingApr = stakingAPR.toNumber();
     aprs.combinedApr = combinedAPR.toNumber();
-  } catch(e) {console.error(e)}
+  } catch {}
 
   return send(200, aprs, {
     'Cache-Control': 'public,s-maxage=60',
@@ -289,9 +293,13 @@ function expandTo18Decimals(value: BigNumber, decimals: BigNumberish) {
   return value.mul(scalar);
 }
 
-function convertStringToBigNumber(input: string, inputDecimals: number, outputDecimals: number): BigNumber {
+function convertStringToBigNumber(
+  input: string,
+  inputDecimals: number,
+  outputDecimals: number,
+): BigNumber {
   const LEADING_ZERO_REGEX = /^0+/;
-  const adjustedStringValue = parseFloat(input)
+  const adjustedStringValue = Number.parseFloat(input)
     .toFixed(outputDecimals - inputDecimals)
     .replace('.', '')
     .replace(LEADING_ZERO_REGEX, '');
