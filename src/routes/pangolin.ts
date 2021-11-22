@@ -267,7 +267,7 @@ export const apr2: Handler = async function (_, context) {
       stakedPNG = adjustedPairValueInUSDT.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(WAVAX_ADDRESS.toLowerCase())) {
       const pairValueInWAVAX = (await getBalance(WAVAX_ADDRESS, stakingTokenAddress)).mul(2);
-      const adjustedPairValue = pairValueInWAVAX.mul(avaxPrice).mul(ONE_TOKEN).div(pngPrice);
+      const adjustedPairValue = pairValueInWAVAX.mul(avaxPrice).div(pngPrice);
       stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     }
 
