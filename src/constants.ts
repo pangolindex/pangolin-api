@@ -1,8 +1,7 @@
 import {BigNumber} from '@ethersproject/bignumber';
 
 export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
-// export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
-export const RPC_URL = 'https://7ade-147-182-223-245.ngrok.io/ext/bc/C/rpc'; // TODO: Switch back to mainnet rpc
+export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
 
 
 export const ZERO = BigNumber.from('0');
@@ -21,7 +20,7 @@ export const FACTORY_ADDRESS = '0xefa94DE7a4656D787667C749f7E1223D71E9FD88';
 export const TREASURY_VESTER_ADDRESS = '0x6747AC215dAFfeE03a42F49FebB6ab448E12acEe';
 export const COMMUNITY_TREASURY_ADDRESS = '0x650f5865541f6D68BdDFE977dB933C293EA72358';
 
-export const MINICHEFV2_ADDRESS = '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853';
+export const MINICHEFV2_ADDRESS = '0x1f806f7C8dED893fd3caE279191ad7Aa3798E928';
 
 // https://github.com/pangolindex/interface/blob/master/src/state/stake/hooks.ts
 export const STAKING_ADDRESSES = [
