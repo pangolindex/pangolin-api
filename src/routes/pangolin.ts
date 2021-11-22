@@ -237,18 +237,18 @@ export const apr2: Handler = async function (_, context) {
 
     let stakedPNG = ZERO;
 
-    if ([token0, token1].includes(PNG_ADDRESS)) {
+    if ([token0, token1].includes(PNG_ADDRESS.toLowerCase())) {
       stakedPNG = (await getBalance(PNG_ADDRESS, stakingTokenAddress)).mul(2);
-    } else if ([token0, token1].includes(DAIe_ADDRESS)) {
+    } else if ([token0, token1].includes(DAIe_ADDRESS.toLowerCase())) {
       const pairValueInDAI = (await getBalance(DAIe_ADDRESS, stakingTokenAddress)).mul(2);
       stakedPNG = pairValueInDAI.div(pngPrice);
-    } else if ([token0, token1].includes(USDCe_ADDRESS)) {
+    } else if ([token0, token1].includes(USDCe_ADDRESS.toLowerCase())) {
       const pairValueInUSDC = (await getBalance(USDCe_ADDRESS, stakingTokenAddress)).mul(2);
       stakedPNG = expandTo18Decimals(pairValueInUSDC, 6).div(pngPrice); // USDCe has 6 decimals
-    } else if ([token0, token1].includes(USDTe_ADDRESS)) {
+    } else if ([token0, token1].includes(USDTe_ADDRESS.toLowerCase())) {
       const pairValueInUSDT = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
       stakedPNG = expandTo18Decimals(pairValueInUSDT, 6).div(pngPrice); // USDTe has 6 decimals
-    } else if ([token0, token1].includes(WAVAX_ADDRESS)) {
+    } else if ([token0, token1].includes(WAVAX_ADDRESS.toLowerCase())) {
       const pairValueInWAVAX = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
       stakedPNG = pairValueInWAVAX.mul(avaxPrice).div(pngPrice);
     }
