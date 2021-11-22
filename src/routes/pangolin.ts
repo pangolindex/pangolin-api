@@ -14,6 +14,8 @@ import {
   ZERO,
   TEN,
   EIGHTEEN,
+  ONE_TOKEN,
+  MINICHEFV2_ADDRESS,
 } from '../constants';
 import {
   getStakingTokenAddress,
@@ -232,37 +234,53 @@ export const apr2: Handler = async function (_, context) {
       getTotalAllocationPointsFromMiniChefV2(),
     ]);
 
+    const [pglTotalSupply, pglStaked] = await Promise.all([
+      getTotalSupply(stakingTokenAddress),
+      getBalance(stakingTokenAddress, MINICHEFV2_ADDRESS),
+    ]);
+
     const avaxPrice = convertStringToBigNumber(avaxPriceString, 0, 18);
-    const pngPrice = convertStringToBigNumber(derivedPngString, 0, 18).mul(avaxPrice);
+    const pngPrice = convertStringToBigNumber(derivedPngString, 0, 18)
+      .mul(avaxPrice)
+      .div(ONE_TOKEN);
 
     let stakedPNG = ZERO;
 
     if ([token0, token1].includes(PNG_ADDRESS.toLowerCase())) {
-      stakedPNG = (await getBalance(PNG_ADDRESS, stakingTokenAddress)).mul(2);
+      const pairValueInPNG = (await getBalance(PNG_ADDRESS, stakingTokenAddress)).mul(2);
+      stakedPNG = pairValueInPNG.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(DAIe_ADDRESS.toLowerCase())) {
       const pairValueInDAI = (await getBalance(DAIe_ADDRESS, stakingTokenAddress)).mul(2);
-      stakedPNG = pairValueInDAI.div(pngPrice);
+      const adjustedPairValue = pairValueInDAI.mul(ONE_TOKEN).div(pngPrice);
+      stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(USDCe_ADDRESS.toLowerCase())) {
       const pairValueInUSDC = (await getBalance(USDCe_ADDRESS, stakingTokenAddress)).mul(2);
-      stakedPNG = expandTo18Decimals(pairValueInUSDC, 6).div(pngPrice); // USDCe has 6 decimals
+      const adjustedPairValue = expandTo18Decimals(pairValueInUSDC.mul(ONE_TOKEN).div(pngPrice), 6); // USDCe has 6 decimals
+      console.log(adjustedPairValue.toString());
+      stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(USDTe_ADDRESS.toLowerCase())) {
       const pairValueInUSDT = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
-      stakedPNG = expandTo18Decimals(pairValueInUSDT, 6).div(pngPrice); // USDTe has 6 decimals
+      const adjustedPairValueInUSDT = expandTo18Decimals(
+        pairValueInUSDT.mul(ONE_TOKEN).div(pngPrice),
+        6,
+      ); // USDTe has 6 decimals
+      stakedPNG = adjustedPairValueInUSDT.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(WAVAX_ADDRESS.toLowerCase())) {
-      const pairValueInWAVAX = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
-      stakedPNG = pairValueInWAVAX.mul(avaxPrice).div(pngPrice);
+      const pairValueInWAVAX = (await getBalance(WAVAX_ADDRESS, stakingTokenAddress)).mul(2);
+      const adjustedPairValue = pairValueInWAVAX.mul(avaxPrice).mul(ONE_TOKEN).div(pngPrice);
+      stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     }
 
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
       : rewardPerSecond
+          // Percentage
+          .mul(100)
           // Calculate reward rate per year
           .mul(60 * 60 * 24 * 365)
           // Calculate weight of pool
           .mul(poolInfo.allocPoint)
           .div(totalAllocPoints)
-          // Percentage
-          .mul(100)
           // Divide by amount staked to get APR
           .div(stakedPNG);
 
