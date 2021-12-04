@@ -27,6 +27,7 @@ import {
   getRewardPerSecondFromMiniChefV2,
   getTotalAllocationPointsFromMiniChefV2,
   getPoolInfoFromMiniChefV2,
+  getStakingTokenAddressesFromMiniChefV2,
 } from '../utils/calls';
 
 // GET /pangolin/addresses
@@ -302,6 +303,13 @@ export const apr2: Handler = async function (_, context) {
   } catch {}
 
   return send(200, aprs, {
+    'Cache-Control': 'public,s-maxage=60',
+  });
+};
+
+export const stakingTokenAddresses: Handler = async function (_) {
+  const stakingTokenAddresses = await getStakingTokenAddressesFromMiniChefV2();
+  return send(200, stakingTokenAddresses?.[0], {
     'Cache-Control': 'public,s-maxage=60',
   });
 };
