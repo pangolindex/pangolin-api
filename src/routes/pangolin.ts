@@ -1,6 +1,6 @@
-import type { Handler } from 'worktop';
-import { send } from 'worktop/response';
-import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
+import type {Handler} from 'worktop';
+import {send} from 'worktop/response';
+import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {
@@ -37,7 +37,7 @@ export const addresses: Handler = async function () {
   let firstUser = '0x0000000000000000000000000000000000000000';
 
   do {
-    const { users } = await gql.request(QUERIES.USER, {
+    const {users} = await gql.request(QUERIES.USER, {
       first: 1000,
       firstUser,
       orderBy: 'id',
@@ -55,7 +55,7 @@ export const addresses: Handler = async function () {
 // GET /pangolin/transaction-average
 export const average: Handler = async function () {
   const result = await gql.request(QUERIES.FACTORY);
-  const { totalVolumeUSD, txCount } = result.pangolinFactories[0];
+  const {totalVolumeUSD, txCount} = result.pangolinFactories[0];
 
   const text = (Number.parseFloat(totalVolumeUSD) / Number.parseInt(txCount, 10)).toFixed(2);
 
@@ -88,7 +88,7 @@ export const apr: Handler = async function (_, context) {
     const days = 7;
 
     const [
-      { pairDayDatas },
+      {pairDayDatas},
       poolTokenBalance,
       poolTokenSupply,
       [token0, token1],
@@ -157,7 +157,7 @@ export const apr: Handler = async function (_, context) {
 
     let swapVolumeUSD = ZERO;
     let liquidityUSD = ZERO;
-    for (const { dailyVolumeUSD, reserveUSD } of pairDayDatas) {
+    for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
       swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
       liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
     }
@@ -196,12 +196,12 @@ export const apr2: Handler = async function (_, context) {
     const days = 7;
 
     const [
-      { pairDayDatas },
+      {pairDayDatas},
       {
-        bundle: { ethPrice: avaxPriceString },
+        bundle: {ethPrice: avaxPriceString},
       },
       {
-        token: { derivedETH: derivedPngString },
+        token: {derivedETH: derivedPngString},
       },
       [token0, token1],
       rewardPerSecond,
@@ -287,7 +287,7 @@ export const apr2: Handler = async function (_, context) {
 
     let swapVolumeUSD = ZERO;
     let liquidityUSD = ZERO;
-    for (const { dailyVolumeUSD, reserveUSD } of pairDayDatas) {
+    for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
       swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
       liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
     }
@@ -307,7 +307,7 @@ export const apr2: Handler = async function (_, context) {
   });
 };
 
-export const stakingTokenAddresses: Handler = async function (_, context) {
+export const stakingTokenAddresses: Handler = async function (_) {
   const stakingTokenAddresses = await getStakingTokenAddressesFromMiniChefV2();
   return send(200, stakingTokenAddresses?.[0], {
     'Cache-Control': 'public,s-maxage=60',
