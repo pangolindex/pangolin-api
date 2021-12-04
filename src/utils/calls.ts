@@ -23,6 +23,10 @@ export async function getStakingTokenAddressFromMiniChefV2(pid: string) {
   return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpToken', [pid]));
 }
 
+export async function getStakingTokenAddressesFromMiniChefV2() {
+  return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpTokens'));
+}
+
 export async function getRewardRate(address: string) {
   return BigNumber.from(await call(STAKING_REWARDS_ABI, address, 'rewardRate'));
 }

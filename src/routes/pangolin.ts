@@ -27,6 +27,7 @@ import {
   getRewardPerSecondFromMiniChefV2,
   getTotalAllocationPointsFromMiniChefV2,
   getPoolInfoFromMiniChefV2,
+  getStakingTokenAddressesFromMiniChefV2,
 } from '../utils/calls';
 
 // GET /pangolin/addresses
@@ -305,6 +306,13 @@ export const apr2: Handler = async function (_, context) {
     'Cache-Control': 'public,s-maxage=60',
   });
 };
+
+export const stakingTokenAddresses: Handler = async function (_, context) {
+  const stakingTokenAddresses = await getStakingTokenAddressesFromMiniChefV2();
+  return send(200, stakingTokenAddresses, {
+    'Cache-Control': 'public,s-maxage=60',
+  });
+}
 
 function expandTo18Decimals(value: BigNumber, decimals: BigNumberish) {
   const scalar = TEN.pow(EIGHTEEN.sub(decimals));
