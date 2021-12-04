@@ -1,6 +1,6 @@
-import {BigNumber} from '@ethersproject/bignumber';
-import {Interface} from '@ethersproject/abi';
-import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
+import { BigNumber } from '@ethersproject/bignumber';
+import { Interface } from '@ethersproject/abi';
+import { hexStripZeros, hexZeroPad } from '@ethersproject/bytes';
 import {
   RPC_URL,
   ERC20_ABI,
@@ -24,7 +24,9 @@ export async function getStakingTokenAddressFromMiniChefV2(pid: string) {
 }
 
 export async function getStakingTokenAddressesFromMiniChefV2() {
-  return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpTokens'));
+  const iface = new Interface(MINICHEF_ABI);
+  const response = await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpTokens');
+  return iface.decodeFunctionResult('lpTokens', response);
 }
 
 export async function getRewardRate(address: string) {
@@ -76,7 +78,7 @@ export async function call(
 
   const _ = await fetch(RPC_URL, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       id: 1,
       jsonrpc: '2.0',
@@ -91,7 +93,7 @@ export async function call(
     }),
   });
 
-  const {result} = await _.json();
+  const { result } = await _.json();
 
   return result;
 }
