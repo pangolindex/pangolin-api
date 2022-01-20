@@ -4,6 +4,7 @@ import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {
+  ZERO_ADDRESS,
   STAKING_ADDRESSES,
   WAVAX_ADDRESS,
   PNG_ADDRESS,
@@ -28,6 +29,9 @@ import {
   getTotalAllocationPointsFromMiniChefV2,
   getPoolInfoFromMiniChefV2,
   getStakingTokenAddressesFromMiniChefV2,
+  getRewarder,
+  getRewarderViaMultiplierGetRewardTokens,
+  getRewarderViaMultiplierPendingTokens,
 } from '../utils/calls';
 
 // GET /pangolin/addresses
@@ -207,6 +211,7 @@ export const apr2: Handler = async function (_, context) {
       rewardPerSecond,
       poolInfo,
       totalAllocPoints,
+      rewarderAddress,
     ] = await Promise.all([
       // Swap volume over 7 days
       gql.request(QUERIES.DAILY_VOLUME, {
@@ -233,6 +238,9 @@ export const apr2: Handler = async function (_, context) {
 
       // Total allocation points
       getTotalAllocationPointsFromMiniChefV2(),
+
+      // Rewarder address
+      getRewarder(poolId),
     ]);
 
     const [pglTotalSupply, pglStaked] = await Promise.all([
@@ -244,6 +252,36 @@ export const apr2: Handler = async function (_, context) {
     const pngPrice = convertStringToBigNumber(derivedPngString, 0, 18)
       .mul(avaxPrice)
       .div(ONE_TOKEN);
+
+    let extraRewardTokensPerSecondInPNG = ZERO;
+
+    if (rewarderAddress !== ZERO_ADDRESS) {
+      const [superFarmRewardTokens, [, superFarmMultipliers]] = await Promise.all([
+        getRewarderViaMultiplierGetRewardTokens(rewarderAddress),
+        getRewarderViaMultiplierPendingTokens(rewarderAddress, ZERO_ADDRESS, ONE_TOKEN.toString()),
+      ]);
+
+      const derivedAVAXResults = await Promise.all(
+        superFarmRewardTokens.map(async (address: string) => getDerivedAVAXFromToken(address)), // eslint-disable-line
+      );
+      const rewardTokenPricesInAVAX = derivedAVAXResults.map((x: any) => {
+        return convertStringToBigNumber(x.token.derivedETH, 0, 18);
+      });
+      const rewardTokenPricesInPNG = rewardTokenPricesInAVAX.map((x: BigNumber) => {
+        return x.mul(avaxPrice).div(pngPrice);
+      });
+
+      for (let i = 0; i < superFarmRewardTokens.length; i++) {
+        const rewardPerSec = rewardPerSecond
+          .mul(poolInfo.allocPoint)
+          .div(totalAllocPoints)
+          .mul(superFarmMultipliers[i])
+          .div(ONE_TOKEN);
+
+        const rewardPerSecInPNG = rewardPerSec.mul(rewardTokenPricesInPNG[i]).div(ONE_TOKEN);
+        extraRewardTokensPerSecondInPNG = extraRewardTokensPerSecondInPNG.add(rewardPerSecInPNG);
+      }
+    }
 
     let stakedPNG = ZERO;
 
@@ -257,7 +295,6 @@ export const apr2: Handler = async function (_, context) {
     } else if ([token0, token1].includes(USDCe_ADDRESS.toLowerCase())) {
       const pairValueInUSDC = (await getBalance(USDCe_ADDRESS, stakingTokenAddress)).mul(2);
       const adjustedPairValue = expandTo18Decimals(pairValueInUSDC.mul(ONE_TOKEN).div(pngPrice), 6); // USDCe has 6 decimals
-      console.log(adjustedPairValue.toString());
       stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(USDTe_ADDRESS.toLowerCase())) {
       const pairValueInUSDT = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
@@ -272,16 +309,15 @@ export const apr2: Handler = async function (_, context) {
       stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     }
 
+    const poolRewardPerSecInPNG = rewardPerSecond.mul(poolInfo.allocPoint).div(totalAllocPoints);
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
-      : rewardPerSecond
+      : poolRewardPerSecInPNG
+          .add(extraRewardTokensPerSecondInPNG)
           // Percentage
           .mul(100)
           // Calculate reward rate per year
           .mul(60 * 60 * 24 * 365)
-          // Calculate weight of pool
-          .mul(poolInfo.allocPoint)
-          .div(totalAllocPoints)
           // Divide by amount staked to get APR
           .div(stakedPNG);
 
@@ -314,6 +350,12 @@ export const stakingTokenAddresses: Handler = async function (_) {
   });
 };
 
+async function getDerivedAVAXFromToken(tokenAddress: string) {
+  return gql.request(QUERIES.TOKEN_PRICE, {
+    address: tokenAddress.toLowerCase(),
+  });
+}
+
 function expandTo18Decimals(value: BigNumber, decimals: BigNumberish) {
   const scalar = TEN.pow(EIGHTEEN.sub(decimals));
   return value.mul(scalar);
@@ -329,5 +371,5 @@ function convertStringToBigNumber(
     .toFixed(outputDecimals - inputDecimals)
     .replace('.', '')
     .replace(LEADING_ZERO_REGEX, '');
-  return BigNumber.from(adjustedStringValue);
+  return adjustedStringValue.length === 0 ? ZERO : BigNumber.from(adjustedStringValue);
 }
