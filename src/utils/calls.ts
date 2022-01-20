@@ -56,12 +56,20 @@ export async function getRewarderViaMultiplierGetRewardTokens(rewarderAddress: s
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
   const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'getRewardTokens');
   const decoded = iface.decodeFunctionResult('getRewardTokens', response);
-  return decoded[0].map(normalizeAddress);
+  return decoded[0].map((address: string) => normalizeAddress(address)); // eslint-disable-line
 }
 
-export async function getRewarderViaMultiplierPendingTokens(rewarderAddress: string, user: string, rewardAmount: string) {
+export async function getRewarderViaMultiplierPendingTokens(
+  rewarderAddress: string,
+  user: string,
+  rewardAmount: string,
+) {
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
-  const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [0, user, rewardAmount]);
+  const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [
+    0,
+    user,
+    rewardAmount,
+  ]);
   return iface.decodeFunctionResult('pendingTokens', response);
 }
 

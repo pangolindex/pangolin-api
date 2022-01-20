@@ -255,17 +255,23 @@ export const apr2: Handler = async function (_, context) {
 
     let extraRewardTokensPerSecondInPNG = ZERO;
 
-    if (rewarderAddress != ZERO_ADDRESS) {
+    if (rewarderAddress !== ZERO_ADDRESS) {
       const [superFarmRewardTokens, [, superFarmMultipliers]] = await Promise.all([
         getRewarderViaMultiplierGetRewardTokens(rewarderAddress),
         getRewarderViaMultiplierPendingTokens(rewarderAddress, ZERO_ADDRESS, ONE_TOKEN.toString()),
       ]);
 
-      const derivedAVAXResults = await Promise.all(superFarmRewardTokens.map(getDerivedAVAXFromToken));
-      const rewardTokenPricesInAVAX = derivedAVAXResults.map((x: any) => convertStringToBigNumber(x.token.derivedETH, 0, 18));
-      const rewardTokenPricesInPNG = rewardTokenPricesInAVAX.map((x: any) => x.mul(avaxPrice).div(pngPrice));
+      const derivedAVAXResults = await Promise.all(
+        superFarmRewardTokens.map(async (address: string) => getDerivedAVAXFromToken(address)), // eslint-disable-line
+      );
+      const rewardTokenPricesInAVAX = derivedAVAXResults.map((x: any) => {
+        return convertStringToBigNumber(x.token.derivedETH, 0, 18);
+      });
+      const rewardTokenPricesInPNG = rewardTokenPricesInAVAX.map((x: BigNumber) => {
+        return x.mul(avaxPrice).div(pngPrice);
+      });
 
-      superFarmRewardTokens.forEach((address: string, i: number) => {
+      for (let i = 0; i < superFarmRewardTokens.length; i++) {
         const rewardPerSec = rewardPerSecond
           .mul(poolInfo.allocPoint)
           .div(totalAllocPoints)
@@ -274,7 +280,7 @@ export const apr2: Handler = async function (_, context) {
 
         const rewardPerSecInPNG = rewardPerSec.mul(rewardTokenPricesInPNG[i]).div(ONE_TOKEN);
         extraRewardTokensPerSecondInPNG = extraRewardTokensPerSecondInPNG.add(rewardPerSecInPNG);
-      });
+      }
     }
 
     let stakedPNG = ZERO;
@@ -306,7 +312,8 @@ export const apr2: Handler = async function (_, context) {
     const poolRewardPerSecInPNG = rewardPerSecond.mul(poolInfo.allocPoint).div(totalAllocPoints);
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
-      : poolRewardPerSecInPNG.add(extraRewardTokensPerSecondInPNG)
+      : poolRewardPerSecInPNG
+          .add(extraRewardTokensPerSecondInPNG)
           // Percentage
           .mul(100)
           // Calculate reward rate per year
@@ -343,7 +350,7 @@ export const stakingTokenAddresses: Handler = async function (_) {
   });
 };
 
-function getDerivedAVAXFromToken(tokenAddress: string) {
+async function getDerivedAVAXFromToken(tokenAddress: string) {
   return gql.request(QUERIES.TOKEN_PRICE, {
     address: tokenAddress.toLowerCase(),
   });
@@ -364,8 +371,5 @@ function convertStringToBigNumber(
     .toFixed(outputDecimals - inputDecimals)
     .replace('.', '')
     .replace(LEADING_ZERO_REGEX, '');
-  if (adjustedStringValue.length === 0) return ZERO
-  return adjustedStringValue.length === 0
-    ? ZERO
-    : BigNumber.from(adjustedStringValue);
+  return adjustedStringValue.length === 0 ? ZERO : BigNumber.from(adjustedStringValue);
 }
