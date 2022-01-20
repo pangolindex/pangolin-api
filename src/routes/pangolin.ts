@@ -389,5 +389,8 @@ function convertStringToBigNumber(
     .toFixed(outputDecimals - inputDecimals)
     .replace('.', '')
     .replace(LEADING_ZERO_REGEX, '');
-  return BigNumber.from(adjustedStringValue);
+  if (adjustedStringValue.length === 0) return ZERO
+  return adjustedStringValue.length === 0
+    ? ZERO
+    : BigNumber.from(adjustedStringValue);
 }
