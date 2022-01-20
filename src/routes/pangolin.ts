@@ -289,7 +289,7 @@ export const apr2: Handler = async function (_, context) {
         console.log(`Reward per sec in REWARD:`);
         console.log(rewardPerSec.toString());
 
-        const rewardPerSecInPNG = rewardPerSec.div(rewardTokenPricesInPNG[i]);
+        const rewardPerSecInPNG = rewardPerSec.mul(rewardTokenPricesInPNG[i]).div(ONE_TOKEN);
         console.log(`Reward per sec in PNG:`);
         console.log(rewardPerSecInPNG.toString());
 
@@ -327,16 +327,15 @@ export const apr2: Handler = async function (_, context) {
       stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     }
 
+    const poolRewardPerSecInPNG = rewardPerSecond.mul(poolInfo.allocPoint).div(totalAllocPoints);
+    
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
-      : rewardPerSecond.add(extraRewardTokensPerSecondInPNG)
+      : poolRewardPerSecInPNG.add(extraRewardTokensPerSecondInPNG)
           // Percentage
           .mul(100)
           // Calculate reward rate per year
           .mul(60 * 60 * 24 * 365)
-          // Calculate weight of pool
-          .mul(poolInfo.allocPoint)
-          .div(totalAllocPoints)
           // Divide by amount staked to get APR
           .div(stakedPNG);
 
