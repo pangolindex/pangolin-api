@@ -7,6 +7,7 @@ export const ZERO = BigNumber.from('0');
 export const TEN = BigNumber.from('10');
 export const EIGHTEEN = BigNumber.from('18');
 export const ONE_TOKEN = BigNumber.from('1000000000000000000');
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const TOTAL_SUPPLY = ONE_TOKEN.mul(538_000_000);
 
 export const PNG_ADDRESS = '0x60781C2586D68229fde47564546784ab3fACA982';
@@ -189,6 +190,25 @@ export const STAKING_REWARDS_ABI = [
   },
 ];
 export const MINICHEF_ABI = [
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    name: 'rewarder',
+    outputs: [
+      {
+        internalType: 'contract IRewarder',
+        name: '',
+        type: 'address'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
   {
     inputs: [
       {
@@ -385,6 +405,199 @@ export const MINICHEF_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+];
+export const REWARDER_VIA_MULTIPLIER_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "_rewardTokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_rewardMultipliers",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_baseRewardTokenDecimals",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_chefV2",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "getRewardMultipliers",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRewardTokens",
+    "outputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "onReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "pendingTokens",
+    "outputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "pendingTokensDebt",
+    "outputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rewardMultipliers",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rewardTokens",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
 ];
 export const PAIR_ABI = [
   {

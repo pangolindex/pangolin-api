@@ -4,6 +4,7 @@ import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
 import * as QUERIES from '../utils/queries';
 import * as gql from '../utils/gql';
 import {
+  ZERO_ADDRESS,
   STAKING_ADDRESSES,
   WAVAX_ADDRESS,
   PNG_ADDRESS,
@@ -28,6 +29,9 @@ import {
   getTotalAllocationPointsFromMiniChefV2,
   getPoolInfoFromMiniChefV2,
   getStakingTokenAddressesFromMiniChefV2,
+  getRewarder,
+  getRewarderViaMultiplierGetRewardTokens,
+  getRewarderViaMultiplierPendingTokens,
 } from '../utils/calls';
 
 // GET /pangolin/addresses
@@ -207,6 +211,7 @@ export const apr2: Handler = async function (_, context) {
       rewardPerSecond,
       poolInfo,
       totalAllocPoints,
+      rewarderAddress,
     ] = await Promise.all([
       // Swap volume over 7 days
       gql.request(QUERIES.DAILY_VOLUME, {
@@ -233,7 +238,12 @@ export const apr2: Handler = async function (_, context) {
 
       // Total allocation points
       getTotalAllocationPointsFromMiniChefV2(),
+
+      // Rewarder address
+      getRewarder(poolId),
     ]);
+
+    console.log(rewarderAddress);
 
     const [pglTotalSupply, pglStaked] = await Promise.all([
       getTotalSupply(stakingTokenAddress),
@@ -244,6 +254,51 @@ export const apr2: Handler = async function (_, context) {
     const pngPrice = convertStringToBigNumber(derivedPngString, 0, 18)
       .mul(avaxPrice)
       .div(ONE_TOKEN);
+
+    let extraRewardTokensPerSecondInPNG = ZERO;
+
+    if (rewarderAddress != ZERO_ADDRESS) {
+      console.log(`Inside the superfarm loop`);
+
+
+      // Get multiplier
+      // Get reward PNG value
+      // Reward Per Sec (reward) = pngPerSec * multiplier
+      // Reward Per Sec (png) = rewardPerSecondREWARD * rewardValuePNG
+
+      const [superFarmRewardTokens, [, superFarmMultipliers]] = await Promise.all([
+        getRewarderViaMultiplierGetRewardTokens(rewarderAddress),
+        getRewarderViaMultiplierPendingTokens(rewarderAddress, ZERO_ADDRESS, ONE_TOKEN.toString()),
+      ]);
+
+      const derivedAVAXResults = await Promise.all(superFarmRewardTokens.map(getDerivedAVAXFromToken));
+      console.log(superFarmMultipliers.map(x => x.toString()));
+      const rewardTokenPricesInAVAX = derivedAVAXResults.map((x: any) => convertStringToBigNumber(x.token.derivedETH, 0, 18));
+      console.log(`Value in AVAX:`);
+      console.log(rewardTokenPricesInAVAX[0].toString());
+      const rewardTokenPricesInPNG = rewardTokenPricesInAVAX.map((x: any) => x.mul(avaxPrice).div(pngPrice));
+      console.log(`Value in PNG:`);
+      console.log(rewardTokenPricesInPNG[0].toString());
+
+      superFarmRewardTokens.forEach((address: string, i: number) => {
+        const rewardPerSec = rewardPerSecond
+          .mul(poolInfo.allocPoint)
+          .div(totalAllocPoints)
+          .mul(superFarmMultipliers[i])
+          .div(ONE_TOKEN);
+        console.log(`Reward per sec in REWARD:`);
+        console.log(rewardPerSec.toString());
+
+        const rewardPerSecInPNG = rewardPerSec.div(rewardTokenPricesInPNG[i]);
+        console.log(`Reward per sec in PNG:`);
+        console.log(rewardPerSecInPNG.toString());
+
+        extraRewardTokensPerSecondInPNG = extraRewardTokensPerSecondInPNG.add(rewardPerSecInPNG);
+      });
+    }
+
+    console.log(`Extra reward tokens per sec in PNG:`);
+    console.log(extraRewardTokensPerSecondInPNG.toString());
 
     let stakedPNG = ZERO;
 
@@ -274,7 +329,7 @@ export const apr2: Handler = async function (_, context) {
 
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
-      : rewardPerSecond
+      : rewardPerSecond.add(extraRewardTokensPerSecondInPNG)
           // Percentage
           .mul(100)
           // Calculate reward rate per year
@@ -313,6 +368,12 @@ export const stakingTokenAddresses: Handler = async function (_) {
     'Cache-Control': 'public,s-maxage=60',
   });
 };
+
+function getDerivedAVAXFromToken(tokenAddress: string) {
+  return gql.request(QUERIES.TOKEN_PRICE, {
+    address: tokenAddress.toLowerCase(),
+  });
+}
 
 function expandTo18Decimals(value: BigNumber, decimals: BigNumberish) {
   const scalar = TEN.pow(EIGHTEEN.sub(decimals));

@@ -9,6 +9,7 @@ import {
   PNG_ADDRESS,
   PAIR_ABI,
   MINICHEFV2_ADDRESS,
+  REWARDER_VIA_MULTIPLIER_ABI,
 } from '../constants';
 
 export function normalizeAddress(address: string) {
@@ -43,8 +44,25 @@ export async function getPoolInfoFromMiniChefV2(pid: string) {
   return iface.decodeFunctionResult('poolInfo', response);
 }
 
+export async function getRewarder(pid: string) {
+  return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'rewarder', [pid]));
+}
+
 export async function getTotalAllocationPointsFromMiniChefV2() {
   return BigNumber.from(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'totalAllocPoint'));
+}
+
+export async function getRewarderViaMultiplierGetRewardTokens(rewarderAddress: string) {
+  const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
+  const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'getRewardTokens');
+  const decoded = iface.decodeFunctionResult('getRewardTokens', response);
+  return decoded[0].map(normalizeAddress);
+}
+
+export async function getRewarderViaMultiplierPendingTokens(rewarderAddress: string, user: string, rewardAmount: string) {
+  const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
+  const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [0, user, rewardAmount]);
+  return iface.decodeFunctionResult('pendingTokens', response);
 }
 
 export async function getPNGBalance(address: string) {
