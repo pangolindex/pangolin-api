@@ -243,8 +243,6 @@ export const apr2: Handler = async function (_, context) {
       getRewarder(poolId),
     ]);
 
-    console.log(rewarderAddress);
-
     const [pglTotalSupply, pglStaked] = await Promise.all([
       getTotalSupply(stakingTokenAddress),
       getBalance(stakingTokenAddress, MINICHEFV2_ADDRESS),
@@ -258,27 +256,14 @@ export const apr2: Handler = async function (_, context) {
     let extraRewardTokensPerSecondInPNG = ZERO;
 
     if (rewarderAddress != ZERO_ADDRESS) {
-      console.log(`Inside the superfarm loop`);
-
-
-      // Get multiplier
-      // Get reward PNG value
-      // Reward Per Sec (reward) = pngPerSec * multiplier
-      // Reward Per Sec (png) = rewardPerSecondREWARD * rewardValuePNG
-
       const [superFarmRewardTokens, [, superFarmMultipliers]] = await Promise.all([
         getRewarderViaMultiplierGetRewardTokens(rewarderAddress),
         getRewarderViaMultiplierPendingTokens(rewarderAddress, ZERO_ADDRESS, ONE_TOKEN.toString()),
       ]);
 
       const derivedAVAXResults = await Promise.all(superFarmRewardTokens.map(getDerivedAVAXFromToken));
-      console.log(superFarmMultipliers.map(x => x.toString()));
       const rewardTokenPricesInAVAX = derivedAVAXResults.map((x: any) => convertStringToBigNumber(x.token.derivedETH, 0, 18));
-      console.log(`Value in AVAX:`);
-      console.log(rewardTokenPricesInAVAX[0].toString());
       const rewardTokenPricesInPNG = rewardTokenPricesInAVAX.map((x: any) => x.mul(avaxPrice).div(pngPrice));
-      console.log(`Value in PNG:`);
-      console.log(rewardTokenPricesInPNG[0].toString());
 
       superFarmRewardTokens.forEach((address: string, i: number) => {
         const rewardPerSec = rewardPerSecond
@@ -286,19 +271,11 @@ export const apr2: Handler = async function (_, context) {
           .div(totalAllocPoints)
           .mul(superFarmMultipliers[i])
           .div(ONE_TOKEN);
-        console.log(`Reward per sec in REWARD:`);
-        console.log(rewardPerSec.toString());
 
         const rewardPerSecInPNG = rewardPerSec.mul(rewardTokenPricesInPNG[i]).div(ONE_TOKEN);
-        console.log(`Reward per sec in PNG:`);
-        console.log(rewardPerSecInPNG.toString());
-
         extraRewardTokensPerSecondInPNG = extraRewardTokensPerSecondInPNG.add(rewardPerSecInPNG);
       });
     }
-
-    console.log(`Extra reward tokens per sec in PNG:`);
-    console.log(extraRewardTokensPerSecondInPNG.toString());
 
     let stakedPNG = ZERO;
 
@@ -312,7 +289,6 @@ export const apr2: Handler = async function (_, context) {
     } else if ([token0, token1].includes(USDCe_ADDRESS.toLowerCase())) {
       const pairValueInUSDC = (await getBalance(USDCe_ADDRESS, stakingTokenAddress)).mul(2);
       const adjustedPairValue = expandTo18Decimals(pairValueInUSDC.mul(ONE_TOKEN).div(pngPrice), 6); // USDCe has 6 decimals
-      console.log(adjustedPairValue.toString());
       stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(USDTe_ADDRESS.toLowerCase())) {
       const pairValueInUSDT = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
@@ -328,7 +304,6 @@ export const apr2: Handler = async function (_, context) {
     }
 
     const poolRewardPerSecInPNG = rewardPerSecond.mul(poolInfo.allocPoint).div(totalAllocPoints);
-    
     const stakingAPR = stakedPNG.isZero()
       ? ZERO
       : poolRewardPerSecInPNG.add(extraRewardTokensPerSecondInPNG)
