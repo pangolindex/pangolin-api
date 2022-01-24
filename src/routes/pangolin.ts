@@ -36,9 +36,9 @@ import {
 
 // GET /pangolin/addresses
 export const addresses: Handler = async function () {
-  let number_addresses = 0;
+  let number_addresses = 75000;
   let new_addrs = 0;
-  let firstUser = '0x0000000000000000000000000000000000000000';
+  let firstUser = '0xfc8bf1127aba05e37862ea211ca23b328909c509';
 
   do {
     const {users} = await gql.request(QUERIES.USER, {
