@@ -51,7 +51,7 @@ export const addresses: Handler = async function () {
     firstUser = users[users.length - 1].id;
     new_addrs = users.length;
     number_addresses += new_addrs;
-    // console.log(`addresses: ${number_addresses} @ ${firstUser}`);
+    // Snapshot via: console.log(`addresses: ${number_addresses} @ ${firstUser}`);
   } while (new_addrs === 1000);
 
   return send(200, number_addresses, {
