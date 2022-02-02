@@ -10,8 +10,10 @@ import {
   PNG_ADDRESS,
   WAVAX_PNG_ADDRESS,
   DAIe_ADDRESS,
+  USDC_ADDRESS,
   USDCe_ADDRESS,
   USDTe_ADDRESS,
+  UST_ADDRESS,
   ZERO,
   TEN,
   EIGHTEEN,
@@ -38,7 +40,7 @@ import {
 export const addresses: Handler = async function () {
   let number_addresses = 75_000;
   let new_addrs = 0;
-  let firstUser = '0xfc8bf1127aba05e37862ea211ca23b328909c509';
+  let firstUser = '0xf776a66ca5f7012d8e89b112df49d32d6c5610a1';
 
   do {
     const {users} = await gql.request(QUERIES.USER, {
@@ -49,6 +51,7 @@ export const addresses: Handler = async function () {
     firstUser = users[users.length - 1].id;
     new_addrs = users.length;
     number_addresses += new_addrs;
+    // Snapshot via: console.log(`addresses: ${number_addresses} @ ${firstUser}`);
   } while (new_addrs === 1000);
 
   return send(200, number_addresses, {
@@ -296,6 +299,10 @@ export const apr2: Handler = async function (_, context) {
       const pairValueInUSDC = (await getBalance(USDCe_ADDRESS, stakingTokenAddress)).mul(2);
       const adjustedPairValue = expandTo18Decimals(pairValueInUSDC.mul(ONE_TOKEN).div(pngPrice), 6); // USDCe has 6 decimals
       stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
+    } else if ([token0, token1].includes(USDC_ADDRESS.toLowerCase())) {
+      const pairValueInUSDC = (await getBalance(USDC_ADDRESS, stakingTokenAddress)).mul(2);
+      const adjustedPairValue = expandTo18Decimals(pairValueInUSDC.mul(ONE_TOKEN).div(pngPrice), 6); // USDC has 6 decimals
+      stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(USDTe_ADDRESS.toLowerCase())) {
       const pairValueInUSDT = (await getBalance(USDTe_ADDRESS, stakingTokenAddress)).mul(2);
       const adjustedPairValueInUSDT = expandTo18Decimals(
@@ -303,6 +310,10 @@ export const apr2: Handler = async function (_, context) {
         6,
       ); // USDTe has 6 decimals
       stakedPNG = adjustedPairValueInUSDT.mul(pglStaked).div(pglTotalSupply);
+    } else if ([token0, token1].includes(UST_ADDRESS.toLowerCase())) {
+      const pairValueInUST = (await getBalance(UST_ADDRESS, stakingTokenAddress)).mul(2);
+      const adjustedPairValue = expandTo18Decimals(pairValueInUST.mul(ONE_TOKEN).div(pngPrice), 6); // UST has 6 decimals
+      stakedPNG = adjustedPairValue.mul(pglStaked).div(pglTotalSupply);
     } else if ([token0, token1].includes(WAVAX_ADDRESS.toLowerCase())) {
       const pairValueInWAVAX = (await getBalance(WAVAX_ADDRESS, stakingTokenAddress)).mul(2);
       const adjustedPairValue = pairValueInWAVAX.mul(avaxPrice).div(pngPrice);
