@@ -40,7 +40,7 @@ import {
 export const addresses: Handler = async function () {
   let number_addresses = 75_000;
   let new_addrs = 0;
-  let firstUser = '0xfc8bf1127aba05e37862ea211ca23b328909c509';
+  let firstUser = '0xf776a66ca5f7012d8e89b112df49d32d6c5610a1';
 
   do {
     const {users} = await gql.request(QUERIES.USER, {
@@ -51,6 +51,7 @@ export const addresses: Handler = async function () {
     firstUser = users[users.length - 1].id;
     new_addrs = users.length;
     number_addresses += new_addrs;
+    // console.log(`addresses: ${number_addresses} @ ${firstUser}`);
   } while (new_addrs === 1000);
 
   return send(200, number_addresses, {
