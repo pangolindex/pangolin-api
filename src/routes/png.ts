@@ -8,6 +8,7 @@ import {
   ONE_TOKEN,
   TREASURY_VESTER_ADDRESS,
   COMMUNITY_TREASURY_ADDRESS,
+  ORIGINALLY_MINTED_SUPPLY,
 } from '../constants';
 
 // GET /png/tvl
@@ -50,7 +51,7 @@ export const supplyWhole: Handler = async function () {
 
 // GET /png/circulating-supply
 export const circulating: Handler = async function () {
-  const text = TOTAL_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
+  const text = ORIGINALLY_MINTED_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
     .sub(await getPNGBalance(COMMUNITY_TREASURY_ADDRESS))
     .toString();
 
@@ -61,7 +62,7 @@ export const circulating: Handler = async function () {
 
 // GET /png/circulating-supply-whole
 export const circulatingWhole: Handler = async function () {
-  const text = TOTAL_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
+  const text = ORIGINALLY_MINTED_SUPPLY.sub(await getPNGBalance(TREASURY_VESTER_ADDRESS))
     .sub(await getPNGBalance(COMMUNITY_TREASURY_ADDRESS))
     .div(ONE_TOKEN)
     .toString();
