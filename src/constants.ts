@@ -8,6 +8,7 @@ export const TEN = BigNumber.from('10');
 export const EIGHTEEN = BigNumber.from('18');
 export const ONE_TOKEN = BigNumber.from('1000000000000000000');
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const ORIGINALLY_MINTED_SUPPLY = ONE_TOKEN.mul(538_000_000);
 export const TOTAL_SUPPLY = ONE_TOKEN.mul(230_000_000);
 
 export const PNG_ADDRESS = '0x60781C2586D68229fde47564546784ab3fACA982';
