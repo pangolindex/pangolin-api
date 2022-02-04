@@ -33,7 +33,7 @@ describe('/png', (it) => {
     const {statusCode, data, headers} = await get('/png/total-supply');
 
     assert.is(statusCode, 200);
-    assert.is(data, '538000000000000000000000000');
+    assert.is(data, '230000000000000000000000000');
     assert.is(headers['cache-control'], 'public,s-maxage=31536000,immutable');
   });
 
