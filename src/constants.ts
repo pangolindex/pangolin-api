@@ -1,6 +1,6 @@
 import {BigNumber} from '@ethersproject/bignumber';
 
-export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex';
+export const GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/pangolindex/exchange';
 export const RPC_URL = 'https://api.avax.network/ext/bc/C/rpc';
 
 export const ZERO = BigNumber.from('0');
