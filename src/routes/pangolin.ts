@@ -169,8 +169,8 @@ export const apr: Handler = async function (_, context) {
       liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
     }
 
-    const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
-    const averageLiquidityUSD = liquidityUSD.div(days);
+    const fees = swapVolumeUSD.mul(365).div(pairDayDatas.length).mul(3).div(1000);
+    const averageLiquidityUSD = liquidityUSD.div(pairDayDatas.length);
     const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
     const combinedAPR = stakingAPR.add(swapFeeAPR);
 
@@ -334,13 +334,14 @@ export const apr2: Handler = async function (_, context) {
 
     let swapVolumeUSD = ZERO;
     let liquidityUSD = ZERO;
+
     for (const {dailyVolumeUSD, reserveUSD} of pairDayDatas) {
       swapVolumeUSD = swapVolumeUSD.add(Math.floor(dailyVolumeUSD));
       liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
     }
 
-    const fees = swapVolumeUSD.mul(365).div(days).mul(3).div(1000);
-    const averageLiquidityUSD = liquidityUSD.div(days);
+    const fees = swapVolumeUSD.mul(365).div(pairDayDatas.length).mul(3).div(1000);
+    const averageLiquidityUSD = liquidityUSD.div(pairDayDatas.length);
     const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
     const combinedAPR = stakingAPR.add(swapFeeAPR);
 
