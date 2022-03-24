@@ -119,8 +119,8 @@ Example call: `curl --location --request GET 'https://api.pangolin.exchange/pang
 ### Pangolin Average Percentage Reward Rate
 
 Get the PNG Reward Rate of the inputted StakingRewards contract address.
-Refer to [constants.ts](./src/constants.ts) to find the supported contract addresses.
+Refer to [Snowtrace](https://snowtrace.io/address/0x1f806f7C8dED893fd3caE279191ad7Aa3798E928#readContract) to find pIDs(pool ids).
 
-Endpoint: `/pangolin/apr/{address}`
+Endpoint: `/pangolin/apr2/{pID}`
 
-Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/apr/0x417c02150b9a31bcacb201d1d60967653384e1c6'`
+Example call: `curl --location --request GET 'https://api.pangolin.exchange/pangolin/apr2/1'`
