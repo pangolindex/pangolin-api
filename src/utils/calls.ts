@@ -81,6 +81,10 @@ export async function getTotalSupply(address: string) {
   return BigNumber.from(await call(ERC20_ABI, address, 'totalSupply'));
 }
 
+export async function getDecimals(address: string) {
+  return BigNumber.from(await call(ERC20_ABI, address, 'decimals'));
+}
+
 export async function getPoolTokens(address: string) {
   const [token0, token1] = await Promise.all([
     call(PAIR_ABI, address, 'token0'),

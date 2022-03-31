@@ -167,6 +167,20 @@ export const ERC20_ABI = [
     type: 'function',
   },
   {
+    constant: true,
+    inputs: [],
+    name: 'decimals',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     type: 'function',
     stateMutability: 'view',
     payable: false,
