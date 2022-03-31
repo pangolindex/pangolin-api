@@ -23,6 +23,7 @@ import {
 import {
   getStakingTokenAddress,
   getBalance,
+  getDecimals,
   getTotalSupply,
   getPoolTokens,
   getRewardRate,
@@ -267,6 +268,9 @@ export const apr2: Handler = async function (_, context) {
       const derivedAVAXResults = await Promise.all(
         superFarmRewardTokens.map(async (address: string) => getDerivedAVAXFromToken(address)), // eslint-disable-line
       );
+      const rewardDecimals: BigNumber[] = await Promise.all(
+        superFarmRewardTokens.map(async (address: string) => getDecimals(address)), // eslint-disable-line
+      );
       const rewardTokenPricesInAVAX = derivedAVAXResults.map((x: any) => {
         return convertStringToBigNumber(x.token.derivedETH, 0, 18);
       });
@@ -275,13 +279,15 @@ export const apr2: Handler = async function (_, context) {
       });
 
       for (let i = 0; i < superFarmRewardTokens.length; i++) {
-        const rewardPerSec = rewardPerSecond
+        const rewardPerSecInReward = rewardPerSecond
           .mul(poolInfo.allocPoint)
           .div(totalAllocPoints)
           .mul(superFarmMultipliers[i])
+          .div(ONE_TOKEN)
+          .mul(rewardTokenPricesInPNG[i])
           .div(ONE_TOKEN);
 
-        const rewardPerSecInPNG = rewardPerSec.mul(rewardTokenPricesInPNG[i]).div(ONE_TOKEN);
+        const rewardPerSecInPNG = expandTo18Decimals(rewardPerSecInReward, rewardDecimals[i]);
         extraRewardTokensPerSecondInPNG = extraRewardTokensPerSecondInPNG.add(rewardPerSecInPNG);
       }
     }
