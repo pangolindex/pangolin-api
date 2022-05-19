@@ -145,7 +145,9 @@ describe('/v2/:chain/png', (it) => {
 
 describe('/pangolin', (it) => {
   it('/pangolin/addresses', async () => {
-    const {statusCode, data, headers} = await get('/pangolin/addresses');
+    const {statusCode, data, headers} = await get('/pangolin/addresses', {
+      timeout: 60_000,
+    });
 
     assert.is(statusCode, 200);
     assert.match(data, /^[.?\d]+/);
@@ -185,7 +187,9 @@ describe('/pangolin', (it) => {
 
 describe('/v2/:chain/pangolin', (it) => {
   it('/v2/43114/pangolin/addresses', async () => {
-    const {statusCode, data, headers} = await get('/v2/43114/pangolin/addresses');
+    const {statusCode, data, headers} = await get('/v2/43114/pangolin/addresses', {
+      timeout: 60_000,
+    });
 
     assert.is(statusCode, 200);
     assert.match(data, /^[.?\d]+/);
