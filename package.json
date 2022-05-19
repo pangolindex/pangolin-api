@@ -1,11 +1,12 @@
 {
   "name": "pangolin-api",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "API for reading some key values of Pangolin and the PNG token.",
   "private": true,
   "author": "Dhruba Basu",
   "contributors": [
-    "Connor Daly"
+    "Connor Daly",
+    "Brandon Mino"
   ],
   "main": "build/index.js",
   "scripts": {
@@ -18,6 +19,7 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
+    "@pangolindex/sdk": "2.0.5",
     "worktop": "0.8.0-next.5"
   },
   "devDependencies": {
