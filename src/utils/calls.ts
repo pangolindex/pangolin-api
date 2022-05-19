@@ -1,71 +1,77 @@
-import {BigNumber} from '@ethersproject/bignumber';
 import {Interface} from '@ethersproject/abi';
+import {BigNumber} from '@ethersproject/bignumber';
 import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
-import {
-  RPC_URL,
-  ERC20_ABI,
-  STAKING_REWARDS_ABI,
-  MINICHEF_ABI,
-  PNG_ADDRESS,
-  PAIR_ABI,
-  MINICHEFV2_ADDRESS,
-  REWARDER_VIA_MULTIPLIER_ABI,
-} from '../constants';
+import {ERC20_ABI, MINICHEF_ABI, PAIR_ABI, REWARDER_VIA_MULTIPLIER_ABI} from '../constants';
 
-export function normalizeAddress(address: string) {
+export function normalizeAddress(address: string): string {
   return hexZeroPad(hexStripZeros(address), 20);
 }
 
-export async function getStakingTokenAddress(address: string) {
-  return normalizeAddress(await call(STAKING_REWARDS_ABI, address, 'stakingToken'));
+const getStakingTokenAddressFromMiniChefV2Cache: Record<string, string> = {};
+export async function getStakingTokenAddressFromMiniChefV2(
+  rpc: string,
+  chefAddress: string,
+  pid: string,
+): Promise<string> {
+  const key = `${rpc}${chefAddress}${pid}`;
+
+  let result: string = getStakingTokenAddressFromMiniChefV2Cache[key];
+  if (result !== undefined) return result;
+
+  result = normalizeAddress(await call(rpc, MINICHEF_ABI, chefAddress, 'lpToken', [pid]));
+
+  getStakingTokenAddressFromMiniChefV2Cache[key] = result;
+  return result;
 }
 
-export async function getStakingTokenAddressFromMiniChefV2(pid: string) {
-  return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpToken', [pid]));
-}
-
-export async function getStakingTokenAddressesFromMiniChefV2() {
+export async function getStakingTokenAddressesFromMiniChefV2(rpc: string, chefAddress: string) {
   const iface = new Interface(MINICHEF_ABI);
-  const response = await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'lpTokens');
+  const response = await call(rpc, MINICHEF_ABI, chefAddress, 'lpTokens');
   return iface.decodeFunctionResult('lpTokens', response);
 }
 
-export async function getRewardRate(address: string) {
-  return BigNumber.from(await call(STAKING_REWARDS_ABI, address, 'rewardRate'));
+export async function getRewardPerSecondFromMiniChefV2(
+  rpc: string,
+  chefAddress: string,
+): Promise<BigNumber> {
+  return BigNumber.from(await call(rpc, MINICHEF_ABI, chefAddress, 'rewardPerSecond'));
 }
 
-export async function getRewardPerSecondFromMiniChefV2() {
-  return BigNumber.from(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'rewardPerSecond'));
-}
-
-export async function getPoolInfoFromMiniChefV2(pid: string) {
+export async function getPoolInfoFromMiniChefV2(rpc: string, chefAddress: string, pid: string) {
   const iface = new Interface(MINICHEF_ABI);
-  const response = await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'poolInfo', [pid]);
+  const response = await call(rpc, MINICHEF_ABI, chefAddress, 'poolInfo', [pid]);
   return iface.decodeFunctionResult('poolInfo', response);
 }
 
-export async function getRewarder(pid: string) {
-  return normalizeAddress(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'rewarder', [pid]));
+export async function getRewarder(rpc: string, chefAddress: string, pid: string): Promise<string> {
+  return normalizeAddress(await call(rpc, MINICHEF_ABI, chefAddress, 'rewarder', [pid]));
 }
 
-export async function getTotalAllocationPointsFromMiniChefV2() {
-  return BigNumber.from(await call(MINICHEF_ABI, MINICHEFV2_ADDRESS, 'totalAllocPoint'));
+export async function getTotalAllocationPointsFromMiniChefV2(
+  rpc: string,
+  chefAddress: string,
+): Promise<BigNumber> {
+  return BigNumber.from(await call(rpc, MINICHEF_ABI, chefAddress, 'totalAllocPoint'));
 }
 
-export async function getRewarderViaMultiplierGetRewardTokens(rewarderAddress: string) {
+export async function getRewarderViaMultiplierGetRewardTokens(
+  rpc: string,
+  rewarderAddress: string,
+): Promise<string[]> {
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
-  const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'getRewardTokens');
+  const response = await call(rpc, REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'getRewardTokens');
   const decoded = iface.decodeFunctionResult('getRewardTokens', response);
   return decoded[0].map((address: string) => normalizeAddress(address)); // eslint-disable-line
 }
 
 export async function getRewarderViaMultiplierPendingTokens(
+  rpc: string,
   rewarderAddress: string,
   user: string,
   rewardAmount: string,
 ) {
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
-  const response = await call(REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [
+  const response = await call(rpc, REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [
     0,
     user,
     rewardAmount,
@@ -73,32 +79,47 @@ export async function getRewarderViaMultiplierPendingTokens(
   return iface.decodeFunctionResult('pendingTokens', response);
 }
 
-export async function getPNGBalance(address: string) {
-  return getBalance(PNG_ADDRESS, address);
+export async function getTotalSupply(rpc: string, address: string): Promise<BigNumber> {
+  return BigNumber.from(await call(rpc, ERC20_ABI, address, 'totalSupply'));
 }
 
-export async function getTotalSupply(address: string) {
-  return BigNumber.from(await call(ERC20_ABI, address, 'totalSupply'));
+const getDecimalsCache: Record<string, BigNumber> = {};
+export async function getDecimals(rpc: string, address: string): Promise<BigNumber> {
+  const key = `${rpc}${address}`;
+
+  let result: BigNumber = getDecimalsCache[key];
+  if (result !== undefined) return result;
+
+  result = BigNumber.from(await call(rpc, ERC20_ABI, address, 'decimals'));
+
+  getDecimalsCache[key] = result;
+  return result;
 }
 
-export async function getDecimals(address: string) {
-  return BigNumber.from(await call(ERC20_ABI, address, 'decimals'));
-}
+const getPoolTokensCache: Record<string, [string, string]> = {};
+export async function getPoolTokens(rpc: string, address: string): Promise<[string, string]> {
+  const key = `${rpc}${address}`;
 
-export async function getPoolTokens(address: string) {
-  const [token0, token1] = await Promise.all([
-    call(PAIR_ABI, address, 'token0'),
-    call(PAIR_ABI, address, 'token1'),
+  let result: [string, string] = getPoolTokensCache[key];
+  if (result !== undefined) return result;
+
+  const [token0, token1] = await Promise.all<string>([
+    call(rpc, PAIR_ABI, address, 'token0'),
+    call(rpc, PAIR_ABI, address, 'token1'),
   ]);
 
-  return [normalizeAddress(token0), normalizeAddress(token1)];
+  result = [normalizeAddress(token0), normalizeAddress(token1)];
+
+  getPoolTokensCache[key] = result;
+  return result;
 }
 
-export async function getBalance(erc20: string, address: string) {
-  return BigNumber.from(await call(ERC20_ABI, erc20, 'balanceOf', [address]));
+export async function getBalance(rpc: string, erc20: string, address: string): Promise<BigNumber> {
+  return BigNumber.from(await call(rpc, ERC20_ABI, erc20, 'balanceOf', [address]));
 }
 
 export async function call(
+  rpc: string,
   abi: any[],
   toAddress: string,
   functionName: string,
@@ -106,7 +127,7 @@ export async function call(
 ) {
   const iface = new Interface(abi);
 
-  const _ = await fetch(RPC_URL, {
+  const _ = await fetch(rpc, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({

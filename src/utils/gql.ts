@@ -1,6 +1,25 @@
-import {GRAPH_URL} from '../constants';
+import * as QUERIES from './queries';
 
-export async function request(query: string, variables = {}, url = GRAPH_URL) {
+export async function getTokenPriceETH(url: string, address: string): Promise<string> {
+  const response = await request(QUERIES.TOKEN_PRICE, url, {
+    address: address.toLowerCase(),
+  });
+  return response.token.derivedETH;
+}
+
+export async function getPairPriceUSD(url: string, address: string): Promise<string> {
+  const response = await request(QUERIES.PAIR_VALUE, url, {
+    address: address.toLowerCase(),
+  });
+  return response.pair.reserveUSD;
+}
+
+export async function getETHPrice(url: string): Promise<string> {
+  const response = await request(QUERIES.AVAX_PRICE, url);
+  return response.bundle.ethPrice;
+}
+
+export async function request(query: string, url: string, variables = {}) {
   const _ = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
