@@ -105,6 +105,8 @@ export const aprChef: Handler = async (_, context) => {
       poolInfo,
       totalAllocPoints,
       rewarderAddress,
+      pglTotalSupply,
+      pglStaked,
     ] = await Promise.all([
       // Swap volume over 7 days
       gql.request(QUERIES.DAILY_VOLUME, chainInfo.subgraph_exchange, {
@@ -135,10 +137,9 @@ export const aprChef: Handler = async (_, context) => {
 
       // Rewarder address
       getRewarder(chainInfo.rpc, chainInfo.mini_chef, poolId),
-    ]);
 
-    const [pglTotalSupply, pglStaked] = await Promise.all<BigNumber>([
       getTotalSupply(chainInfo.rpc, stakingTokenAddress),
+
       getBalance(chainInfo.rpc, stakingTokenAddress, chainInfo.mini_chef),
     ]);
 
@@ -177,7 +178,7 @@ export const aprChef: Handler = async (_, context) => {
       ]);
 
       for (let i = 0; i < superFarmRewardTokens.length; i++) {
-        const rewardPerSecInReward = rewardPerSecond
+        const rewardPerSecInReward: BigNumber = (rewardPerSecond as BigNumber)
           .mul(poolInfo.allocPoint)
           .div(totalAllocPoints)
           .mul(superFarmMultipliers[i])
@@ -190,23 +191,25 @@ export const aprChef: Handler = async (_, context) => {
       }
     }
 
-    let stakedPNG;
+    let stakedPNG: BigNumber;
     if ([token0, token1].includes(chainInfo.png.toLowerCase())) {
-      const halfPairValueInPNG = await getBalance(
+      const halfPairValueInPNG: BigNumber = await getBalance(
         chainInfo.rpc,
         chainInfo.png,
         stakingTokenAddress,
       );
       stakedPNG = halfPairValueInPNG.mul(2).mul(pglStaked).div(pglTotalSupply);
     } else {
-      const pairValueInPNG = convertStringToBigNumber(pairValueUSD, 0, 18)
+      const pairValueInPNG: BigNumber = convertStringToBigNumber(pairValueUSD, 0, 18)
         .mul(ONE_TOKEN)
         .div(pngPrice);
       stakedPNG = pairValueInPNG.mul(pglStaked).div(pglTotalSupply);
     }
 
-    const poolRewardPerSecInPNG = rewardPerSecond.mul(poolInfo.allocPoint).div(totalAllocPoints);
-    const stakingAPR = stakedPNG.isZero()
+    const poolRewardPerSecInPNG: BigNumber = (rewardPerSecond as BigNumber)
+      .mul(poolInfo.allocPoint)
+      .div(totalAllocPoints);
+    const stakingAPR: BigNumber = stakedPNG.isZero()
       ? ZERO
       : poolRewardPerSecInPNG
           .add(extraRewardTokensPerSecondInPNG)
