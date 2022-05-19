@@ -1,6 +1,4 @@
-import {FACTORY_ADDRESS} from '../constants';
-
-export const FACTORY = `
+export const _FACTORY = (FACTORY_ADDRESS: string) => `
 query pangolinFactories {
 	pangolinFactories(where: { id: "${FACTORY_ADDRESS}" }) {
 		id
@@ -48,5 +46,12 @@ export const TOKEN_PRICE = `
 query token($address: ID) {
   token(id: $address) {
     derivedETH
+  }
+}`;
+
+export const PAIR_VALUE = `
+query pair($address: ID) {
+  pair(id: $address) {
+    reserveUSD
   }
 }`;
