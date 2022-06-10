@@ -145,9 +145,9 @@ export async function call(
   });
 
   if (_.status !== 200) {
-    const msg = `[${_.statusText}]: Error fetching ${toAddress}.${functionName}(...)`;
-    console.error(msg);
-    throw new Error(msg);
+    const message = `[${_.statusText}]: Error fetching ${toAddress}.${functionName}(...)`;
+    console.error(message);
+    throw new Error(message);
   }
 
   const {result} = await _.json();

@@ -45,10 +45,10 @@ export function getChainInfo(chainString: string | undefined): ChainInfo {
     subgraph_exchange: chain.subgraph?.exchange ?? undefined,
   };
 
-  const missingInfos = Object.entries(chainInfo).filter(([k, v]) => v === EMPTY);
+  const missingInfos = Object.entries(chainInfo).filter(([, v]) => v === EMPTY);
 
   if (missingInfos.length > 0) {
-    const missingKeys = missingInfos.map(([k, v]) => k);
+    const missingKeys = missingInfos.map(([k]) => k);
     throw new Error(`Missing chain info properties (${missingKeys.join(',')})`);
   }
 
