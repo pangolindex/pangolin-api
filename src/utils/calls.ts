@@ -144,6 +144,12 @@ export async function call(
     }),
   });
 
+  if (_.status !== 200) {
+    const msg = `[${_.statusText}]: Error fetching ${toAddress}.${functionName}(...)`;
+    console.error(msg);
+    throw new Error(msg);
+  }
+
   const {result} = await _.json();
 
   return result;

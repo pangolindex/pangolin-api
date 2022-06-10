@@ -29,6 +29,12 @@ export async function request(query: string, url: string, variables = {}) {
     }),
   });
 
+  if (_.status !== 200) {
+    const msg = `[${_.statusText}]: Error querying ${query}`;
+    console.error(msg);
+    throw new Error(msg);
+  }
+
   const {data} = await _.json();
 
   return data;
