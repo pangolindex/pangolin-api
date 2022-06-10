@@ -826,10 +826,10 @@
   dependencies:
     hardhat-tracer "^1.0.0-alpha.5"
 
-"@pangolindex/sdk@2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@pangolindex/sdk/-/sdk-2.0.5.tgz#f793436ed7e0da980dea5fc8190f0ddc3125aa62"
-  integrity sha512-YoNCM31K4q3SfT4WI9kpgAIgjq+DRYrDn1Bvp4KHUVfVzFs5wNlYZ8+74Tzvl6Zl/ZOOUiIxXKd58GJX10cSsw==
+"@pangolindex/sdk@^2.0.11":
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/@pangolindex/sdk/-/sdk-2.0.11.tgz#4648869ccd58a5dcba324416bc62a3c1aed14539"
+  integrity sha512-8xcui5rWGSbTe89TP0lQaEw648lj5JR6czN5a8be+WXuWLzwOr7OTDnch76tY438IvO+zer27s8UODUEaTdHVw==
   dependencies:
     "@pangolindex/exchange-contracts" "^1.0.1"
     big.js "^5.2.2"

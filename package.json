@@ -19,7 +19,7 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@pangolindex/sdk": "2.0.5",
+    "@pangolindex/sdk": "2.0.11",
     "worktop": "0.8.0-next.5"
   },
   "devDependencies": {
