@@ -19,7 +19,7 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@pangolindex/sdk": "2.0.5",
+    "@pangolindex/sdk": "2.0.11",
     "worktop": "0.8.0-next.5"
   },
   "devDependencies": {
@@ -27,8 +27,10 @@
     "@ethersproject/abi": "5.4.1",
     "@ethersproject/bignumber": "5.4.2",
     "@ethersproject/bytes": "5.4.0",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
     "cfw": "0.3.0",
     "concurrently": "6.3.0",
+    "eslint-config-xo-typescript": "0.51.1",
     "httpie": "2.0.0-next.13",
     "loadr": "0.1.1",
     "tsm": "2.1.2",

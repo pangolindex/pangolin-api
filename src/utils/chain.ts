@@ -9,7 +9,7 @@ export interface ChainInfo {
   community_treasury: string;
   treasury_vester: string;
   rpc: string;
-  subgraph_exchange: string;
+  subgraph_exchange?: string;
 }
 
 export function getChainInfo(chainString: string | undefined): ChainInfo {
@@ -29,24 +29,27 @@ export function getChainInfo(chainString: string | undefined): ChainInfo {
     throw new Error(`Pangolin is not live on chain ${chainString}`);
   }
 
-  const DEFAULT = '';
+  const EMPTY = '';
 
   const chainInfo = {
-    chainId: chain.chain_id.toString(),
-    png: chain.contracts?.png ?? DEFAULT,
-    wrapped_native_token: chain.contracts?.wrapped_native_token ?? DEFAULT,
-    mini_chef: chain.contracts?.mini_chef ?? DEFAULT,
-    factory: chain.contracts?.factory ?? DEFAULT,
+    chainId: chain.chain_id?.toString() ?? EMPTY,
+    png: chain.contracts?.png ?? EMPTY,
+    wrapped_native_token: chain.contracts?.wrapped_native_token ?? EMPTY,
+    mini_chef: chain.contracts?.mini_chef ?? EMPTY,
+    factory: chain.contracts?.factory ?? EMPTY,
 
-    community_treasury: chain.contracts?.community_treasury ?? DEFAULT,
-    treasury_vester: chain.contracts?.treasury_vester ?? DEFAULT,
+    community_treasury: chain.contracts?.community_treasury ?? EMPTY,
+    treasury_vester: chain.contracts?.treasury_vester ?? EMPTY,
 
     rpc: chain.rpc_uri,
-    subgraph_exchange: chain.subgraph?.exchange ?? DEFAULT,
+    subgraph_exchange: chain.subgraph?.exchange ?? undefined,
   };
 
-  if (Object.values(chainInfo).includes(DEFAULT)) {
-    throw new Error(`Missing chain info value`);
+  const missingInfos = Object.entries(chainInfo).filter(([, v]) => v === EMPTY);
+
+  if (missingInfos.length > 0) {
+    const missingKeys = missingInfos.map(([k]) => k);
+    throw new Error(`Missing chain info properties (${missingKeys.join(',')})`);
   }
 
   return chainInfo;
