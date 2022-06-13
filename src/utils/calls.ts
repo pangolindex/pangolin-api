@@ -1,4 +1,4 @@
-import {Interface} from '@ethersproject/abi';
+import {Interface, Result} from '@ethersproject/abi';
 import {BigNumber} from '@ethersproject/bignumber';
 import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
 import {ERC20_ABI, MINICHEF_ABI, PAIR_ABI, REWARDER_VIA_MULTIPLIER_ABI} from '../constants';
@@ -24,7 +24,10 @@ export async function getStakingTokenAddressFromMiniChefV2(
   return result;
 }
 
-export async function getStakingTokenAddressesFromMiniChefV2(rpc: string, chefAddress: string) {
+export async function getStakingTokenAddressesFromMiniChefV2(
+  rpc: string,
+  chefAddress: string,
+): Promise<Result> {
   const iface = new Interface(MINICHEF_ABI);
   const response = await call(rpc, MINICHEF_ABI, chefAddress, 'lpTokens');
   return iface.decodeFunctionResult('lpTokens', response);
@@ -37,10 +40,30 @@ export async function getRewardPerSecondFromMiniChefV2(
   return BigNumber.from(await call(rpc, MINICHEF_ABI, chefAddress, 'rewardPerSecond'));
 }
 
-export async function getPoolInfoFromMiniChefV2(rpc: string, chefAddress: string, pid: string) {
+export async function getPoolInfoFromMiniChefV2(
+  rpc: string,
+  chefAddress: string,
+  pid: string,
+): Promise<Result> {
   const iface = new Interface(MINICHEF_ABI);
   const response = await call(rpc, MINICHEF_ABI, chefAddress, 'poolInfo', [pid]);
   return iface.decodeFunctionResult('poolInfo', response);
+}
+
+export async function getPoolInfosFromMiniChefV2(
+  rpc: string,
+  chefAddress: string,
+): Promise<
+  Array<{accRewardPerShare: BigNumber; lastRewardTime: BigNumber; allocPoint: BigNumber}>
+> {
+  const iface = new Interface(MINICHEF_ABI);
+  const response = await call(rpc, MINICHEF_ABI, chefAddress, 'poolInfos');
+  const decoded = iface.decodeFunctionResult('poolInfos', response);
+  return (decoded[0] as BigNumber[][]).map((data: BigNumber[]) => ({
+    accRewardPerShare: data[0],
+    lastRewardTime: data[1],
+    allocPoint: data[2],
+  }));
 }
 
 export async function getRewarder(rpc: string, chefAddress: string, pid: string): Promise<string> {
@@ -69,7 +92,7 @@ export async function getRewarderViaMultiplierPendingTokens(
   rewarderAddress: string,
   user: string,
   rewardAmount: string,
-) {
+): Promise<Result> {
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
   const response = await call(rpc, REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [
     0,
