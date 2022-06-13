@@ -48,6 +48,7 @@ API.add('GET', '/v2/:chain/png/community-treasury-whole', Png.treasuryWhole);
 API.add('GET', '/v2/:chain/pangolin/addresses', Pangolin.addresses);
 API.add('GET', '/v2/:chain/pangolin/transaction-average', Pangolin.average);
 API.add('GET', '/v2/:chain/pangolin/apr/:pid', Pangolin.aprChef);
+API.add('GET', '/v2/:chain/pangolin/aprs/:pids', Pangolin.aprChefMultiple);
 API.add('GET', '/v2/:chain/pangolin/stakingTokenAddresses', Pangolin.stakingTokenAddresses);
 
 Cache.listen(async (event) => {

@@ -215,4 +215,21 @@ describe('/v2/:chain/pangolin', (it) => {
     assert.ok(data.combinedApr !== undefined);
     assert.is(headers['content-type'], 'application/json;charset=utf-8');
   });
+
+  it(`/v2/43114/pangolin/aprs/:pids`, async () => {
+    const pids = [0, 1, 2, 3];
+
+    const {statusCode, data, headers} = await get(`/v2/43114/pangolin/aprs/${pids.join(',')}`);
+
+    assert.is(statusCode, 200);
+    assert.equal(data.length, pids.length);
+
+    for (let i = 0; i < pids.length; i++) {
+      assert.ok(data[i].swapFeeApr !== undefined);
+      assert.ok(data[i].stakingApr !== undefined);
+      assert.ok(data[i].combinedApr !== undefined);
+    }
+
+    assert.is(headers['content-type'], 'application/json;charset=utf-8');
+  });
 });
