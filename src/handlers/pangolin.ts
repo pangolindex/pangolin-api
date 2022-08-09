@@ -193,7 +193,10 @@ export const aprChef: Handler = async (_, context) => {
     }
 
     let stakedPNG: BigNumber;
-    if ([token0, token1].includes(chainInfo.png.toLowerCase())) {
+
+    if (pglTotalSupply.isZero()) {
+      stakedPNG = ZERO
+    } else if ([token0, token1].includes(chainInfo.png.toLowerCase())) {
       const halfPairValueInPNG: BigNumber = await getBalance(
         chainInfo.rpc,
         chainInfo.png,
@@ -376,7 +379,10 @@ export const aprChefMultiple: Handler = async (_, context) => {
       }
 
       let stakedPNG: BigNumber;
-      if ([token0, token1].includes(chainInfo.png.toLowerCase())) {
+
+      if (pglTotalSupply.isZero()) {
+        stakedPNG = ZERO
+      } else if ([token0, token1].includes(chainInfo.png.toLowerCase())) {
         const halfPairValueInPNG: BigNumber = await getBalance(
           chainInfo.rpc,
           chainInfo.png,
