@@ -1,36 +1,39 @@
 import {Interface, Result} from '@ethersproject/abi';
 import {BigNumber} from '@ethersproject/bignumber';
 import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
-import {ERC20_ABI, MINICHEF_ABI, PAIR_ABI, REWARDER_VIA_MULTIPLIER_ABI} from '../constants';
+import {ERC20_ABI, MINICHEF_ABI, REWARDER_VIA_MULTIPLIER_ABI} from '../constants';
+import {CloudflareWorkerKV, PoolInfo} from './interfaces';
 
 export function normalizeAddress(address: string): string {
   return hexZeroPad(hexStripZeros(address), 20);
 }
 
-const getStakingTokenAddressFromMiniChefV2Cache: Record<string, string> = {};
 export async function getStakingTokenAddressFromMiniChefV2(
   rpc: string,
   chefAddress: string,
   pid: string,
 ): Promise<string> {
-  const key = `${rpc}${chefAddress}${pid}`;
+  const key = `${rpc}|${chefAddress}|${pid}`;
 
-  let result: string = getStakingTokenAddressFromMiniChefV2Cache[key];
-  if (result !== undefined) return result;
+  // @ts-expect-error CHEF_LP_TOKENS is a CloudFlare KV object
+  const cached: string = await (CHEF_LP_TOKENS as CloudflareWorkerKV).get(key);
+  if (cached !== null) return cached;
 
-  result = normalizeAddress(await call(rpc, MINICHEF_ABI, chefAddress, 'lpToken', [pid]));
+  const result = normalizeAddress(await call(rpc, MINICHEF_ABI, chefAddress, 'lpToken', [pid]));
 
-  getStakingTokenAddressFromMiniChefV2Cache[key] = result;
+  // @ts-expect-error CHEF_LP_TOKENS is a CloudFlare KV object
+  await (CHEF_LP_TOKENS as CloudflareWorkerKV).put(key, result);
   return result;
 }
 
 export async function getStakingTokenAddressesFromMiniChefV2(
   rpc: string,
   chefAddress: string,
-): Promise<Result> {
+): Promise<string[]> {
   const iface = new Interface(MINICHEF_ABI);
   const response = await call(rpc, MINICHEF_ABI, chefAddress, 'lpTokens');
-  return iface.decodeFunctionResult('lpTokens', response);
+  const decoded = iface.decodeFunctionResult('lpTokens', response);
+  return decoded[0].map((address: string) => normalizeAddress(address)); // eslint-disable-line
 }
 
 export async function getRewardPerSecondFromMiniChefV2(
@@ -44,18 +47,21 @@ export async function getPoolInfoFromMiniChefV2(
   rpc: string,
   chefAddress: string,
   pid: string,
-): Promise<Result> {
+): Promise<PoolInfo> {
   const iface = new Interface(MINICHEF_ABI);
   const response = await call(rpc, MINICHEF_ABI, chefAddress, 'poolInfo', [pid]);
-  return iface.decodeFunctionResult('poolInfo', response);
+  const decoded = iface.decodeFunctionResult('poolInfo', response);
+  return {
+    accRewardPerShare: decoded[0],
+    lastRewardTime: decoded[1],
+    allocPoint: decoded[2],
+  };
 }
 
 export async function getPoolInfosFromMiniChefV2(
   rpc: string,
   chefAddress: string,
-): Promise<
-  Array<{accRewardPerShare: BigNumber; lastRewardTime: BigNumber; allocPoint: BigNumber}>
-> {
+): Promise<PoolInfo[]> {
   const iface = new Interface(MINICHEF_ABI);
   const response = await call(rpc, MINICHEF_ABI, chefAddress, 'poolInfos');
   const decoded = iface.decodeFunctionResult('poolInfos', response);
@@ -77,64 +83,53 @@ export async function getTotalAllocationPointsFromMiniChefV2(
   return BigNumber.from(await call(rpc, MINICHEF_ABI, chefAddress, 'totalAllocPoint'));
 }
 
-export async function getRewarderViaMultiplierGetRewardTokens(
+export async function getRewarderViaMultiplierRewardTokens(
   rpc: string,
   rewarderAddress: string,
 ): Promise<string[]> {
+  const key = `${rpc}|${rewarderAddress}|REWARDS`;
+
+  // @ts-expect-error REWARDER_VIA_MULTIPLIER is a CloudFlare KV object
+  const cached: string = await (REWARDER_VIA_MULTIPLIER as CloudflareWorkerKV).get(key);
+  if (cached !== null) return JSON.parse(cached);
+
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
   const response = await call(rpc, REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'getRewardTokens');
   const decoded = iface.decodeFunctionResult('getRewardTokens', response);
-  return decoded[0].map((address: string) => normalizeAddress(address)); // eslint-disable-line
+  const result = decoded[0].map((address: string) => normalizeAddress(address)); // eslint-disable-line
+
+  // @ts-expect-error REWARDER_VIA_MULTIPLIER is a CloudFlare KV object
+  await (REWARDER_VIA_MULTIPLIER as CloudflareWorkerKV).put(key, JSON.stringify(result));
+  return result;
 }
 
-export async function getRewarderViaMultiplierPendingTokens(
+export async function getRewarderViaMultiplierRewardMultipliers(
   rpc: string,
   rewarderAddress: string,
-  user: string,
-  rewardAmount: string,
-): Promise<Result> {
+): Promise<BigNumber[]> {
+  const key = `${rpc}|${rewarderAddress}|MULTIPLIERS`;
+
+  // @ts-expect-error REWARDER_VIA_MULTIPLIER is a CloudFlare KV object
+  const cached: string = await (REWARDER_VIA_MULTIPLIER as CloudflareWorkerKV).get(key);
+  if (cached !== null) return JSON.parse(cached);
+
   const iface = new Interface(REWARDER_VIA_MULTIPLIER_ABI);
-  const response = await call(rpc, REWARDER_VIA_MULTIPLIER_ABI, rewarderAddress, 'pendingTokens', [
-    0,
-    user,
-    rewardAmount,
-  ]);
-  return iface.decodeFunctionResult('pendingTokens', response);
+  const response = await call(
+    rpc,
+    REWARDER_VIA_MULTIPLIER_ABI,
+    rewarderAddress,
+    'getRewardMultipliers',
+  );
+  const decoded = iface.decodeFunctionResult('getRewardMultipliers', response);
+  const result = decoded[0];
+
+  // @ts-expect-error REWARDER_VIA_MULTIPLIER is a CloudFlare KV object
+  await (REWARDER_VIA_MULTIPLIER as CloudflareWorkerKV).put(key, JSON.stringify(result));
+  return result;
 }
 
 export async function getTotalSupply(rpc: string, address: string): Promise<BigNumber> {
   return BigNumber.from(await call(rpc, ERC20_ABI, address, 'totalSupply'));
-}
-
-const getDecimalsCache: Record<string, BigNumber> = {};
-export async function getDecimals(rpc: string, address: string): Promise<BigNumber> {
-  const key = `${rpc}${address}`;
-
-  let result: BigNumber = getDecimalsCache[key];
-  if (result !== undefined) return result;
-
-  result = BigNumber.from(await call(rpc, ERC20_ABI, address, 'decimals'));
-
-  getDecimalsCache[key] = result;
-  return result;
-}
-
-const getPoolTokensCache: Record<string, [string, string]> = {};
-export async function getPoolTokens(rpc: string, address: string): Promise<[string, string]> {
-  const key = `${rpc}${address}`;
-
-  let result: [string, string] = getPoolTokensCache[key];
-  if (result !== undefined) return result;
-
-  const [token0, token1] = await Promise.all<string>([
-    call(rpc, PAIR_ABI, address, 'token0'),
-    call(rpc, PAIR_ABI, address, 'token1'),
-  ]);
-
-  result = [normalizeAddress(token0), normalizeAddress(token1)];
-
-  getPoolTokensCache[key] = result;
-  return result;
 }
 
 export async function getBalance(rpc: string, erc20: string, address: string): Promise<BigNumber> {

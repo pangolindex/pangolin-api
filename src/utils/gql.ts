@@ -7,6 +7,19 @@ export async function getTokenPriceETH(url: string | undefined, address: string)
   return response.token.derivedETH;
 }
 
+export async function getTokenInfo(
+  url: string | undefined,
+  address: string,
+): Promise<{decimals: string; derivedETH: string}> {
+  const response = await request(QUERIES.TOKEN_INFO, url, {
+    address: address.toLowerCase(),
+  });
+  return {
+    decimals: response.token.decimals,
+    derivedETH: response.token.derivedETH,
+  };
+}
+
 export async function getPairPriceUSD(url: string | undefined, address: string): Promise<string> {
   const response = await request(QUERIES.PAIR_VALUE, url, {
     address: address.toLowerCase(),
