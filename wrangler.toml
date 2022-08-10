@@ -2,6 +2,11 @@ name = "pangolin-api"
 type = "javascript"
 workers_dev = true
 account_id = ""
+kv_namespaces = [
+  { binding = "CHEF_LP_TOKENS", preview_id = "ac0c06ac1dce45d0b309de94ec615c90", id = "59811895f932482b87a73688401afd78" },
+  { binding = "REWARDER_VIA_MULTIPLIER", preview_id = "14ee1e968e864b3a848dd3f6b1620d14", id = "951cfe42bf55454c8f0c1f31b24f89d1" }
+]
+compatibility_date = "2022-08-09"
 
 [build]
 command = "yarn run build"

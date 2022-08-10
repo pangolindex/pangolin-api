@@ -455,23 +455,3 @@ export const REWARDER_VIA_MULTIPLIER_ABI = [
     type: 'function',
   },
 ];
-export const PAIR_ABI = [
-  {
-    type: 'function',
-    stateMutability: 'view',
-    payable: false,
-    outputs: [{type: 'address', name: '', internalType: 'address'}],
-    name: 'token0',
-    inputs: [],
-    constant: true,
-  },
-  {
-    type: 'function',
-    stateMutability: 'view',
-    payable: false,
-    outputs: [{type: 'address', name: '', internalType: 'address'}],
-    name: 'token1',
-    inputs: [],
-    constant: true,
-  },
-];

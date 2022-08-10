@@ -49,6 +49,14 @@ query token($address: ID) {
   }
 }`;
 
+export const TOKEN_INFO = `
+query token($address: ID) {
+  token(id: $address) {
+    decimals
+    derivedETH
+  }
+}`;
+
 export const PAIR_VALUE = `
 query pair($address: ID) {
   pair(id: $address) {
