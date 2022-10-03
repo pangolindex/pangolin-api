@@ -15,11 +15,11 @@
     "deploy": "cfw deploy --single",
     "lint": "xo",
     "check": "tsc --noEmit",
-    "test": "concurrently --success first --kill-others \"wrangler dev\" \"wait-on -d 5000 -t 30000 tcp:8787 && loadr -- uvu tests -i setup\""
+    "test": "concurrently --success first --kill-others \"wrangler dev\" \"wait-on -d 5000 -t 30000 tcp:8787 && loadr -- uvu -r esbuild-register tests -i setup\""
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@pangolindex/sdk": "2.0.11",
+    "@pangolindex/sdk": "3.1.5",
     "worktop": "0.8.0-next.5"
   },
   "devDependencies": {
@@ -27,9 +27,13 @@
     "@ethersproject/abi": "5.4.1",
     "@ethersproject/bignumber": "5.4.2",
     "@ethersproject/bytes": "5.4.0",
+    "@ethersproject/contracts": "5.4.1",
+    "@ethersproject/providers": "5.4.5",
+    "@ethersproject/solidity": "5.4.0",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "cfw": "0.3.0",
     "concurrently": "6.3.0",
+    "esbuild-register": "3.3.3",
     "eslint-config-xo-typescript": "0.51.1",
     "httpie": "2.0.0-next.13",
     "loadr": "0.1.1",
