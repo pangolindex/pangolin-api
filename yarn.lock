@@ -623,10 +623,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@pangolindex/sdk@3.1.5":
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/@pangolindex/sdk/-/sdk-3.1.5.tgz#7ad216fcd261eb6507f0b153c78a3f7cb5e31012"
-  integrity sha512-vkvgwdWASgXQauU3r3XC0HlFcvZGFp4qZ8SYYTl7f6HvrVv6dFBf59JPsx/v6jSBk9VekwTn7tN+2Qto8XF+2w==
+"@pangolindex/sdk@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@pangolindex/sdk/-/sdk-5.1.0.tgz#fa42f5af014297c6b80baead3ccfae01f39252ce"
+  integrity sha512-vAct5fs5CGNK+v3eU6kDoOo/9ExyUWYGc/TopUlfs8rS3fh5EItCqj7wjHzuh/hsWIdiDzzu3mgVUq2IN5IOLw==
   dependencies:
     big.js "^5.2.2"
     decimal.js-light "^2.5.0"
