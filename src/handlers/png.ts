@@ -143,3 +143,20 @@ export const treasuryWhole: Handler = async (_, context) => {
     'Cache-Control': 'public,s-maxage=3600',
   });
 };
+
+export const priceUSD: Handler = async (_, context) => {
+  const chainInfo = getChainInfo(context.params.chain);
+
+  let text;
+
+  try {
+    const price = await gql.getTokenPriceUSD(chainInfo.subgraph_exchange, chainInfo.png);
+    text = price.toString();
+  } catch {
+    throw new Error(`This method is not yet support on chain ${chainInfo.chainId}`);
+  }
+
+  return send(200, text, {
+    'Cache-Control': 'public,s-maxage=60',
+  });
+};

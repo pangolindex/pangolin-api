@@ -35,7 +35,7 @@ export function getChainInfo(chainString: string | undefined): ChainInfo {
     chainId: chain.chain_id?.toString() ?? EMPTY,
     png: chain.contracts?.png ?? EMPTY,
     wrapped_native_token: chain.contracts?.wrapped_native_token ?? EMPTY,
-    mini_chef: chain.contracts?.mini_chef ?? EMPTY,
+    mini_chef: chain.contracts?.mini_chef?.address ?? EMPTY,
     factory: chain.contracts?.factory ?? EMPTY,
 
     community_treasury: chain.contracts?.community_treasury ?? EMPTY,

@@ -42,10 +42,17 @@ export const AVAX_PRICE = `
   }
 }`;
 
-export const TOKEN_PRICE = `
+export const TOKEN_PRICE_ETH = `
 query token($address: ID) {
   token(id: $address) {
     derivedETH
+  }
+}`;
+
+export const TOKEN_PRICE_USD = `
+query token($address: ID) {
+  token(id: $address) {
+    derivedUSD
   }
 }`;
 

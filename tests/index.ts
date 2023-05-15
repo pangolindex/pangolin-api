@@ -86,6 +86,14 @@ describe('/v2/:chain/png', (it) => {
     assert.is(headers['cache-control'], 'public,s-maxage=300');
   });
 
+  it('/v2/295/png/priceUSD', async () => {
+    const {statusCode, data, headers} = await get('/v2/295/png/priceUSD');
+
+    assert.is(statusCode, 200);
+    assert.match(data, /^[.?\d]+/);
+    assert.is(headers['cache-control'], 'public,s-maxage=60');
+  });
+
   it('/v2/43114/png/total-volume', async () => {
     const {statusCode, data, headers} = await get('/v2/43114/png/total-volume');
 
