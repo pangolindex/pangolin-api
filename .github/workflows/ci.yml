@@ -21,7 +21,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn run test
         env:
-          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNTID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN_CI }}
   Lint:
     runs-on: ubuntu-latest
     steps:
