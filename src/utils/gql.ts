@@ -1,10 +1,17 @@
 import * as QUERIES from './queries';
 
 export async function getTokenPriceETH(url: string | undefined, address: string): Promise<string> {
-  const response = await request(QUERIES.TOKEN_PRICE, url, {
+  const response = await request(QUERIES.TOKEN_PRICE_ETH, url, {
     address: address.toLowerCase(),
   });
   return response.token.derivedETH;
+}
+
+export async function getTokenPriceUSD(url: string | undefined, address: string): Promise<string> {
+  const response = await request(QUERIES.TOKEN_PRICE_USD, url, {
+    address: address.toLowerCase(),
+  });
+  return response.token.derivedUSD;
 }
 
 export async function getTokenInfo(

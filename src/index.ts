@@ -38,6 +38,7 @@ API.add('GET', '/pangolin/stakingTokenAddresses', Pangolin.stakingTokenAddresses
 
 // V2 API
 API.add('GET', '/v2/:chain/png/tvl', Png.tvl);
+API.add('GET', '/v2/:chain/png/priceUSD', Png.priceUSD);
 API.add('GET', '/v2/:chain/png/total-volume', Png.volume);
 API.add('GET', '/v2/:chain/png/total-supply', Png.supply);
 API.add('GET', '/v2/:chain/png/total-supply-whole', Png.supplyWhole);
