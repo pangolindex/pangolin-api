@@ -3,8 +3,8 @@ type = "javascript"
 workers_dev = true
 account_id = ""
 kv_namespaces = [
-  { binding = "CHEF_LP_TOKENS", preview_id = "816abbc7b2164ec68706a454e0fd4549", id = "59811895f932482b87a73688401afd78" },
-  { binding = "REWARDER_VIA_MULTIPLIER", preview_id = "3d8f6f219fdc4dd58c51a7637b0b5059", id = "951cfe42bf55454c8f0c1f31b24f89d1" }
+  { binding = "CHEF_LP_TOKENS", preview_id = "3366d5258bd74110914b8c6f20d3c70e", id = "59811895f932482b87a73688401afd78" },
+  { binding = "REWARDER_VIA_MULTIPLIER", preview_id = "996cde2e563c48d288a4523641c237b6", id = "951cfe42bf55454c8f0c1f31b24f89d1" }
 ]
 compatibility_date = "2022-08-09"
 
