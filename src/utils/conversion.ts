@@ -1,9 +1,19 @@
 import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
-import {EIGHTEEN, TEN, ZERO} from '../constants';
+import {TEN, ZERO} from '../constants';
 
-export function expandTo18Decimals(value: BigNumber, decimals: BigNumberish): BigNumber {
-  const scalar = TEN.pow(EIGHTEEN.sub(decimals));
-  return value.mul(scalar);
+export function adjustValueDecimals(
+  value: BigNumber,
+  decimalsFrom: BigNumberish,
+  decimalsTo: BigNumberish,
+): BigNumber {
+  const from = BigNumber.from(decimalsFrom);
+  const to = BigNumber.from(decimalsTo);
+
+  return to.gt(from) ? value.mul(scalar(to.sub(from))) : value.div(scalar(from.sub(to)));
+}
+
+export function scalar(exponent: BigNumberish): BigNumber {
+  return TEN.pow(exponent);
 }
 
 export function convertStringToBigNumber(

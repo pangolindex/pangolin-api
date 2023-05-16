@@ -3,7 +3,6 @@ import {BigNumber} from '@ethersproject/bignumber';
 export const ZERO = BigNumber.from('0');
 export const TEN = BigNumber.from('10');
 export const EIGHTEEN = BigNumber.from('18');
-export const ONE_TOKEN = BigNumber.from('1000000000000000000');
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export const ERC20_ABI = [
