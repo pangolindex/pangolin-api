@@ -1,9 +1,9 @@
 import {BigNumber} from '@ethersproject/bignumber';
 import type {Handler} from 'worktop';
 import {send} from 'worktop/response';
-import {ONE_TOKEN} from '../constants';
 import {getBalance, getTotalSupply} from '../utils/calls';
 import {getChainInfo} from '../utils/chain';
+import {adjustValueDecimals, scalar} from '../utils/conversion';
 import * as gql from '../utils/gql';
 import * as QUERIES from '../utils/queries';
 
@@ -44,7 +44,7 @@ export const supply: Handler = async (_, context) => {
 
   if (chainInfo.chainId === '43114') {
     // Override Avalanche total supply to account for TreasuryVesterProxy logical burns
-    text = ONE_TOKEN.mul(230_000_000).toString();
+    text = scalar(18).mul(230_000_000).toString();
   } else {
     const totalSupply = await getTotalSupply(chainInfo.rpc, chainInfo.png);
     text = totalSupply.toString();
@@ -64,8 +64,9 @@ export const supplyWhole: Handler = async (_, context) => {
     // Override Avalanche total supply to account for TreasuryVesterProxy logical burns
     text = BigNumber.from(230_000_000).toString();
   } else {
-    const totalSupply = await getTotalSupply(chainInfo.rpc, chainInfo.png);
-    text = totalSupply.div(ONE_TOKEN).toString();
+    const totalSupplyRaw = await getTotalSupply(chainInfo.rpc, chainInfo.png);
+    const {decimals} = await gql.getTokenInfo(chainInfo.subgraph_exchange, chainInfo.png);
+    text = adjustValueDecimals(totalSupplyRaw, decimals, 0).toString();
   }
 
   return send(200, text, {
@@ -80,7 +81,8 @@ export const circulating: Handler = async (_, context) => {
 
   if (chainInfo.chainId === '43114') {
     // Override Avalanche circulating supply to account for TreasuryVesterProxy logical burns
-    text = ONE_TOKEN.mul(538_000_000)
+    text = scalar(18)
+      .mul(538_000_000)
       .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.treasury_vester))
       .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.community_treasury))
       .toString();
@@ -103,17 +105,18 @@ export const circulatingWhole: Handler = async (_, context) => {
 
   if (chainInfo.chainId === '43114') {
     // Override Avalanche circulating supply to account for TreasuryVesterProxy logical burns
-    text = ONE_TOKEN.mul(538_000_000)
+    text = scalar(18)
+      .mul(538_000_000)
       .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.treasury_vester))
       .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.community_treasury))
-      .div(ONE_TOKEN)
+      .div(scalar(18))
       .toString();
   } else {
-    text = (await getTotalSupply(chainInfo.rpc, chainInfo.png))
+    const circulatingSupplyRaw = (await getTotalSupply(chainInfo.rpc, chainInfo.png))
       .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.treasury_vester))
-      .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.community_treasury))
-      .div(ONE_TOKEN)
-      .toString();
+      .sub(await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.community_treasury));
+    const {decimals} = await gql.getTokenInfo(chainInfo.subgraph_exchange, chainInfo.png);
+    text = adjustValueDecimals(circulatingSupplyRaw, decimals, 0).toString();
   }
 
   return send(200, text, {
@@ -135,9 +138,9 @@ export const treasury: Handler = async (_, context) => {
 export const treasuryWhole: Handler = async (_, context) => {
   const chainInfo = getChainInfo(context.params.chain);
 
-  const text = (await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.community_treasury))
-    .div(ONE_TOKEN)
-    .toString();
+  const treasuryRaw = await getBalance(chainInfo.rpc, chainInfo.png, chainInfo.community_treasury);
+  const {decimals} = await gql.getTokenInfo(chainInfo.subgraph_exchange, chainInfo.png);
+  const text = adjustValueDecimals(treasuryRaw, decimals, 0).toString();
 
   return send(200, text, {
     'Cache-Control': 'public,s-maxage=3600',

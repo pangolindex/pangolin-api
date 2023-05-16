@@ -1,7 +1,7 @@
 import {BigNumber} from '@ethersproject/bignumber';
 import type {Handler} from 'worktop';
 import {send} from 'worktop/response';
-import {EIGHTEEN, ONE_TOKEN, ZERO, ZERO_ADDRESS} from '../constants';
+import {EIGHTEEN, ZERO, ZERO_ADDRESS} from '../constants';
 import {
   getBalance,
   getPoolInfoFromMiniChefV2,
@@ -16,9 +16,8 @@ import {
   getRewarderViaMultiplierRewardMultipliers,
 } from '../utils/calls';
 import {ChainInfo, getChainInfo} from '../utils/chain';
-import {convertStringToBigNumber, expandTo18Decimals} from '../utils/conversion';
+import {convertStringToBigNumber, adjustValueDecimals, scalar} from '../utils/conversion';
 import * as gql from '../utils/gql';
-import {getETHPrice, getPairPriceUSD, getTokenInfo, getTokenPriceETH} from '../utils/gql';
 import * as QUERIES from '../utils/queries';
 import {AprResponse, PoolInfo} from '../utils/interfaces';
 
@@ -87,6 +86,9 @@ export const aprChef: Handler = async (_, context) => {
   // Number of days to average swap volume from
   const days = 7;
 
+  // TODO: Don't assume the network PNG has 18 decimals
+  const pngDecimals = 18;
+
   const [{pairDayDatas}, poolInfo, totalAllocPoints, rewardPerSecond] = await Promise.all<
     any,
     PoolInfo,
@@ -116,13 +118,13 @@ export const aprChef: Handler = async (_, context) => {
   const [_avaxPrice, _derivedPng, pairValueUSD, rewarderAddress, pglTotalSupply, pglStaked] =
     await Promise.all<string, string, string, string, BigNumber, BigNumber>([
       // Variable: _avaxPrice
-      isActiveFarm ? getETHPrice(chainInfo.subgraph_exchange) : '0',
+      isActiveFarm ? gql.getETHPrice(chainInfo.subgraph_exchange) : '0',
 
       // Variable: _derivedPng
-      isActiveFarm ? getTokenPriceETH(chainInfo.subgraph_exchange, chainInfo.png) : '0',
+      isActiveFarm ? gql.getTokenPriceETH(chainInfo.subgraph_exchange, chainInfo.png) : '0',
 
       // Variable: pairValueUSD
-      isActiveFarm ? getPairPriceUSD(chainInfo.subgraph_exchange, stakingTokenAddress) : '0',
+      isActiveFarm ? gql.getPairPriceUSD(chainInfo.subgraph_exchange, stakingTokenAddress) : '0',
 
       // Variable: rewarderAddress
       isActiveFarm ? getRewarder(chainInfo.rpc, chainInfo.mini_chef, poolId) : ZERO_ADDRESS,
@@ -134,8 +136,10 @@ export const aprChef: Handler = async (_, context) => {
       isActiveFarm ? getBalance(chainInfo.rpc, stakingTokenAddress, chainInfo.mini_chef) : ZERO,
     ]);
 
-  const avaxPrice = convertStringToBigNumber(_avaxPrice, 0, 18);
-  const pngPrice = convertStringToBigNumber(_derivedPng, 0, 18).mul(avaxPrice).div(ONE_TOKEN);
+  const avaxPrice = convertStringToBigNumber(_avaxPrice, 0, chainInfo.native_currency_decimals);
+  const pngPrice = convertStringToBigNumber(_derivedPng, 0, pngDecimals)
+    .mul(avaxPrice)
+    .div(scalar(chainInfo.native_currency_decimals));
 
   // Process additional SuperFarm rewards (if any)
   const extraRewardTokensPerSecondInPNG = await getRewarderTokensPerSecondInPNG(
@@ -151,8 +155,8 @@ export const aprChef: Handler = async (_, context) => {
   let stakedPNG = ZERO;
 
   if (isActiveFarm && pglTotalSupply.gt(ZERO) && pngPrice.gt(ZERO)) {
-    const pairValueInPNG: BigNumber = convertStringToBigNumber(pairValueUSD, 0, 18)
-      .mul(ONE_TOKEN)
+    const pairValueInPNG: BigNumber = convertStringToBigNumber(pairValueUSD, 0, pngDecimals)
+      .mul(scalar(pngDecimals))
       .div(pngPrice);
     stakedPNG = pairValueInPNG.mul(pglStaked).div(pglTotalSupply);
   }
@@ -206,14 +210,17 @@ export const aprChefMultiple: Handler = async (_, context) => {
   // Number of days to average swap volume from
   const days = 7;
 
+  // TODO: Don't assume the network PNG has 18 decimals
+  const pngDecimals = 18;
+
   // Singular data
   const [_avaxPrice, _derivedPng, lpTokens, poolInfos, rewardPerSecond, totalAllocPoints] =
     await Promise.all<string, string, string[], PoolInfo[], BigNumber, BigNumber>([
       // Variable: _avaxPrice
-      getETHPrice(chainInfo.subgraph_exchange),
+      gql.getETHPrice(chainInfo.subgraph_exchange),
 
       // Variable: _derivedPng
-      getTokenPriceETH(chainInfo.subgraph_exchange, chainInfo.png),
+      gql.getTokenPriceETH(chainInfo.subgraph_exchange, chainInfo.png),
 
       // Variable: _lpTokens
       getStakingTokenAddressesFromMiniChefV2(chainInfo.rpc, chainInfo.mini_chef),
@@ -229,10 +236,14 @@ export const aprChefMultiple: Handler = async (_, context) => {
     ]);
 
   // Format singular data
-  const avaxPrice: BigNumber = convertStringToBigNumber(_avaxPrice, 0, 18);
-  const pngPrice: BigNumber = convertStringToBigNumber(_derivedPng, 0, 18)
+  const avaxPrice: BigNumber = convertStringToBigNumber(
+    _avaxPrice,
+    0,
+    chainInfo.native_currency_decimals,
+  );
+  const pngPrice: BigNumber = convertStringToBigNumber(_derivedPng, 0, pngDecimals)
     .mul(avaxPrice)
-    .div(ONE_TOKEN);
+    .div(scalar(chainInfo.native_currency_decimals));
   const isActiveChef: boolean = totalAllocPoints.gt(ZERO) && rewardPerSecond.gt(ZERO);
 
   const aprs: AprResponse[] = [];
@@ -256,7 +267,7 @@ export const aprChefMultiple: Handler = async (_, context) => {
         }),
 
         // Variable: pairValueUSD,
-        isActiveFarm ? getPairPriceUSD(chainInfo.subgraph_exchange, stakingTokenAddress) : '0',
+        isActiveFarm ? gql.getPairPriceUSD(chainInfo.subgraph_exchange, stakingTokenAddress) : '0',
 
         // Variable: rewarderAddress
         isActiveFarm
@@ -284,8 +295,8 @@ export const aprChefMultiple: Handler = async (_, context) => {
     let stakedPNG = ZERO;
 
     if (isActiveFarm && pglTotalSupply.gt(ZERO) && pngPrice.gt(ZERO)) {
-      const pairValueInPNG: BigNumber = convertStringToBigNumber(pairValueUSD, 0, 18)
-        .mul(ONE_TOKEN)
+      const pairValueInPNG: BigNumber = convertStringToBigNumber(pairValueUSD, 0, pngDecimals)
+        .mul(scalar(pngDecimals))
         .div(pngPrice);
       stakedPNG = pairValueInPNG.mul(pglStaked).div(pglTotalSupply);
     }
@@ -360,7 +371,7 @@ async function getRewarderTokensPerSecondInPNG(
   const rewardInfos = await Promise.all<{decimals: BigNumber; price: BigNumber}>(
     rewardAddresses.map(async (address: string) => {
       try {
-        const {decimals, derivedETH} = await getTokenInfo(chainInfo.subgraph_exchange, address);
+        const {decimals, derivedETH} = await gql.getTokenInfo(chainInfo.subgraph_exchange, address);
         return {
           price: convertStringToBigNumber(derivedETH, 0, 18).mul(avaxPrice).div(pngPrice),
           decimals: BigNumber.from(decimals),
@@ -378,14 +389,21 @@ async function getRewarderTokensPerSecondInPNG(
   let extraRewardTokensPerSecondInPNG = ZERO;
   const baseRewardPerSecond = rewardPerSecond.mul(farmAllocPoints).div(totalAllocPoints);
 
+  // TODO: Don't assume the network PNG has 18 decimals
+  const pngDecimals = 18;
+
   for (let i = 0; i < rewardAddresses.length; i++) {
     const rewardPerSecInReward: BigNumber = baseRewardPerSecond
       .mul(rewardMultipliers[i])
-      .div(ONE_TOKEN)
+      .div(scalar(pngDecimals))
       .mul(rewardPricesInPNG[i])
-      .div(ONE_TOKEN);
+      .div(scalar(pngDecimals));
 
-    const rewardPerSecInPNG = expandTo18Decimals(rewardPerSecInReward, rewardDecimals[i]);
+    const rewardPerSecInPNG = adjustValueDecimals(
+      rewardPerSecInReward,
+      rewardDecimals[i],
+      pngDecimals,
+    );
     extraRewardTokensPerSecondInPNG = extraRewardTokensPerSecondInPNG.add(rewardPerSecInPNG);
   }
 

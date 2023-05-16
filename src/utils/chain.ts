@@ -6,6 +6,7 @@ export interface ChainInfo {
   wrapped_native_token: string;
   mini_chef: string;
   factory: string;
+  native_currency_decimals: number;
   community_treasury: string;
   treasury_vester: string;
   rpc: string;
@@ -38,12 +39,21 @@ export function getChainInfo(chainString: string | undefined): ChainInfo {
     mini_chef: chain.contracts?.mini_chef?.address ?? EMPTY,
     factory: chain.contracts?.factory ?? EMPTY,
 
+    native_currency_decimals: chain.nativeCurrency.decimals,
+
     community_treasury: chain.contracts?.community_treasury ?? EMPTY,
     treasury_vester: chain.contracts?.treasury_vester ?? EMPTY,
 
     rpc: chain.rpc_uri,
     subgraph_exchange: chain.subgraph?.exchange ?? undefined,
   };
+
+  // Overrides for now
+  if (chainId === ChainId.HEDERA_MAINNET) {
+    chainInfo.rpc = 'https://mainnet.hashio.io/api';
+  } else if (chainId === ChainId.HEDERA_TESTNET) {
+    chainInfo.rpc = 'https://testnet.hashio.io/api';
+  }
 
   const missingInfos = Object.entries(chainInfo).filter(([, v]) => v === EMPTY);
 
