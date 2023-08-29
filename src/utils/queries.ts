@@ -1,6 +1,6 @@
-export const _FACTORY = (FACTORY_ADDRESS: string) => `
-query pangolinFactories {
-	pangolinFactories(where: { id: "${FACTORY_ADDRESS}" }) {
+export const _FACTORY = (ENTITY_NAME: string) => `
+query ${ENTITY_NAME} {
+	${ENTITY_NAME}(where: { id: "1" }) {
 		id
 		totalVolumeUSD
 		totalLiquidityUSD

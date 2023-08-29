@@ -47,11 +47,13 @@ export const addresses: Handler = async (_, context) => {
 export const average: Handler = async (_, context) => {
   const chainInfo = getChainInfo(context.params.chain);
 
+  const entityName = chainInfo.chainId === '43114' ? 'factories' : 'pangolinFactories';
+
   const result = await gql.request(
-    QUERIES._FACTORY(chainInfo.factory),
+    QUERIES._FACTORY(entityName),
     chainInfo.subgraph_exchange,
   );
-  const {totalVolumeUSD, txCount} = result.pangolinFactories[0];
+  const {totalVolumeUSD, txCount} = result[entityName][0];
 
   const text = (Number.parseFloat(totalVolumeUSD) / Number.parseInt(txCount, 10)).toFixed(2);
 

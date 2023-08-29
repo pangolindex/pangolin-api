@@ -10,12 +10,14 @@ import * as QUERIES from '../utils/queries';
 export const tvl: Handler = async (_, context) => {
   const chainInfo = getChainInfo(context.params.chain);
 
+  const entityName = chainInfo.chainId === '43114' ? 'factories' : 'pangolinFactories';
+
   const result = await gql.request(
-    QUERIES._FACTORY(chainInfo.factory),
+    QUERIES._FACTORY(entityName),
     chainInfo.subgraph_exchange,
   );
 
-  const text = Number.parseFloat(result.pangolinFactories[0].totalLiquidityUSD).toFixed(2);
+  const text = Number.parseFloat(result[entityName][0].totalLiquidityUSD).toFixed(2);
 
   return send(200, text, {
     'Cache-Control': 'public,s-maxage=300',
@@ -25,12 +27,14 @@ export const tvl: Handler = async (_, context) => {
 export const volume: Handler = async (_, context) => {
   const chainInfo = getChainInfo(context.params.chain);
 
+  const entityName = chainInfo.chainId === '43114' ? 'factories' : 'pangolinFactories';
+
   const result = await gql.request(
-    QUERIES._FACTORY(chainInfo.factory),
+    QUERIES._FACTORY(entityName),
     chainInfo.subgraph_exchange,
   );
 
-  const text = Number.parseFloat(result.pangolinFactories[0].totalVolumeUSD).toFixed(2);
+  const text = Number.parseFloat(result[entityName][0].totalVolumeUSD).toFixed(2);
 
   return send(200, text, {
     'Cache-Control': 'public,s-maxage=300',
