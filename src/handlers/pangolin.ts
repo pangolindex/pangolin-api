@@ -325,8 +325,8 @@ export const aprChefMultiple: Handler = async (_, context) => {
       liquidityUSD = liquidityUSD.add(Math.floor(reserveUSD));
     }
 
-    const fees = swapVolumeUSD.mul(365).div(pairDayDatas.length).mul(3).div(1000);
-    const averageLiquidityUSD = liquidityUSD.div(pairDayDatas.length);
+    const fees = swapVolumeUSD.mul(365).div(pairDayDatas.length || 1).mul(3).div(1000);
+    const averageLiquidityUSD = liquidityUSD.div(pairDayDatas.length || 1);
     const swapFeeAPR = averageLiquidityUSD.isZero() ? ZERO : fees.mul(100).div(averageLiquidityUSD);
 
     aprs.push({
