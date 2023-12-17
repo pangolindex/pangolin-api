@@ -17,7 +17,7 @@ export async function getTokenPriceUSD(url: string | undefined, address: string)
 export async function getTokenInfo(
   url: string | undefined,
   address: string,
-): Promise<{decimals: string; derivedETH: string}> {
+): Promise<{ decimals: string; derivedETH: string }> {
   const response = await request(QUERIES.TOKEN_INFO, url, {
     address: address.toLowerCase(),
   });
@@ -39,27 +39,49 @@ export async function getETHPrice(url: string | undefined): Promise<string> {
   return response.bundle.ethPrice;
 }
 
+interface CacheEntry {
+  timestamp: number;
+  data: any;
+}
+
+const gqlCache: Record<string, CacheEntry> = {};
+const CACHE_EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes
+
 export async function request(query: string, url: string | undefined, variables = {}) {
   if (url === undefined) {
     throw new Error(`Missing subgraph url`);
   }
 
-  const _ = await fetch(url, {
+  const cacheKey = `${url}|${query}|${JSON.stringify(variables)}`;
+  const currentTime = Date.now();
+
+  // Check if the cache contains a valid entry
+  if (gqlCache[cacheKey] && currentTime - gqlCache[cacheKey].timestamp < CACHE_EXPIRE_TIME) {
+    return gqlCache[cacheKey].data;
+  }
+
+  const response = await fetch(url, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       query,
       variables,
     }),
   });
 
-  if (_.status !== 200) {
-    const message = `[${_.statusText}]: Error querying ${query}`;
+  if (response.status !== 200) {
+    const message = `[${response.statusText}]: Error querying ${query}`;
     console.error(message);
     throw new Error(message);
   }
 
-  const {data} = await _.json();
+  const { data } = await response.json();
+
+  // Cache the new data with a timestamp
+  gqlCache[cacheKey] = {
+    timestamp: currentTime,
+    data,
+  };
 
   return data;
 }

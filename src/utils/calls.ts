@@ -1,8 +1,8 @@
-import {Interface, Result} from '@ethersproject/abi';
-import {BigNumber} from '@ethersproject/bignumber';
-import {hexStripZeros, hexZeroPad} from '@ethersproject/bytes';
-import {ERC20_ABI, MINICHEF_ABI, REWARDER_VIA_MULTIPLIER_ABI} from '../constants';
-import {CloudflareWorkerKV, PoolInfo} from './interfaces';
+import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
+import { hexStripZeros, hexZeroPad } from '@ethersproject/bytes';
+import { ERC20_ABI, MINICHEF_ABI, REWARDER_VIA_MULTIPLIER_ABI } from '../constants';
+import { CloudflareWorkerKV, PoolInfo } from './interfaces';
 
 export function normalizeAddress(address: string): string {
   return hexZeroPad(hexStripZeros(address), 20);
@@ -136,6 +136,14 @@ export async function getBalance(rpc: string, erc20: string, address: string): P
   return BigNumber.from(await call(rpc, ERC20_ABI, erc20, 'balanceOf', [address]));
 }
 
+interface CacheEntry {
+  timestamp: number;
+  data: any;
+}
+
+const rpcCache: Record<string, CacheEntry> = {};
+const CACHE_EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes
+
 export async function call(
   rpc: string,
   abi: any[],
@@ -144,10 +152,17 @@ export async function call(
   functionData: any[] = [],
 ) {
   const iface = new Interface(abi);
+  const cacheKey = `${rpc}|${toAddress}|${functionName}|${JSON.stringify(functionData)}`;
+  const currentTime = Date.now();
 
-  const _ = await fetch(rpc, {
+  // Check if the cache contains a valid entry
+  if (rpcCache[cacheKey] && currentTime - rpcCache[cacheKey].timestamp < CACHE_EXPIRE_TIME) {
+    return rpcCache[cacheKey].data;
+  }
+
+  const response = await fetch(rpc, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       id: 1,
       jsonrpc: '2.0',
@@ -162,13 +177,19 @@ export async function call(
     }),
   });
 
-  if (_.status !== 200) {
-    const message = `[${_.statusText}]: Error fetching ${toAddress}.${functionName}(...)`;
+  if (response.status !== 200) {
+    const message = `[${response.statusText}]: Error fetching ${toAddress}.${functionName}(...)`;
     console.error(message);
     throw new Error(message);
   }
 
-  const {result} = await _.json();
+  const { result } = await response.json();
+
+  // Cache the new data with a timestamp
+  rpcCache[cacheKey] = {
+    timestamp: currentTime,
+    data: result,
+  };
 
   return result;
 }
